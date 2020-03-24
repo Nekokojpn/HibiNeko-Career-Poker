@@ -11,15 +11,27 @@
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/gh/phinajs/phina.js@v0.2.3/build/phina.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <div class="container">
-      <canvas id = "mycanvas"></canvas>
-      <div class="text-area">
-        <div class="chat-area">
-          chat-area
-        </div>
-        <div class="info-area">
-          game-info
+    <div id="app">
+      <div class="container">
+        <header>
+          <h1 class="headline">
+            <a>HibiNeko-Career-Poker</a>
+          </h1>
+        </header>
+        <canvas id = "mycanvas"></canvas>
+        <div class="text-area">
+          <div class="chat-area" ref="chatScroll">
+            <div v-for="chatMessage in messages" v-bind:key="chatMessage.id">{{ chatMessage }}</div>
+          </div>
+          <div class="chat-container">
+            <input type="text" class="chat-input" v-model='message' v-on:keydown.enter='postChat' />
+            <button class="chat-button" v-on:click='postChat'>post</button>
+          </div>
+          <div class="info-area">
+            game-info
+          </div>
         </div>
       </div>
     </div>
@@ -29,42 +41,87 @@
 <style>
 html {
     height: 100%;
+    
 }
 
 body {
     height: 100%;
     margin: 0;
-    background-color: black;
+    background-color: #fff;
+}
+
+header {
+  height: 1%;
+  width: 100%;
+  padding: 15px 0;
+  background-color: #337079;
+  color: white;
+}
+header .headline{
+    line-height: 0px;
+    float: left;
+    font-size: 20px;
+    margin-left: 10px;
+}
+.nav-list {
+    line-height: 5px;
+    float: left;
+    margin-left: 30px;
+    list-style: none;
+}
+.nav-list-item {
+  list-style: none;
+  display: inline-block;
+  margin: 0 20px;
 }
 
 .container {
   display: flex;
+  flex-wrap: wrap;
 }
 
 #mycanvas {
   margin: 0 auto;
-  width: 75%;
-  height: 100%;
+  width: 60%;
+  height: 50%;
   display: inline-block;
   margin-right: auto;
+  margin-left: auto;
+  margin-top: 5%;
+  border: solid red;
 }
 
 .text-area {
   display: inline-block;
   width: 25%;
-  height: 99vh;
+  height: 90vh;
   border: solid #ff00ff;
   background-color: #fff;
 }
 
 .chat-area {
   width: auto;
-  height: 50vh;
+  height: 44.5vh;
   border: solid green;
+  position: relative;
+  overflow:scroll;
+  overflow-x: hidden;
 }
+
+.chat-container {
+  width: 100%;
+}
+
+.chat-input {
+  width: 75%;
+}
+.chat-button {
+  width: 20%;
+}
+
 .info-area {
   width: auto;
-  height: 47.75vh;
+  height: 42.0vh;
   border: solid blue;
 }
 </style>
@@ -157,7 +214,7 @@ phina.define("MainScene", {
     this.createLabel(this, 'turnText', 'TURN:', 'white', fontSize, 10, 100);
 
    /*
-    * 以下socket
+    * 以下ゲームのsocket
     */
 
     //初期socket
@@ -190,9 +247,7 @@ phina.define("MainScene", {
       console.log(nextPlayerId);
     });
 
-    socket.on('connection_from_server', (txt) => {
-      console.log(txt);
-    });
+    
   },
   // 毎フレーム更新処理
   update: function() {
@@ -212,12 +267,42 @@ phina.main(function() {
     query: '#mycanvas',
     // 画面をフィットさせない
     fit: false,
-    width: 1000,
-    height: 600,
+    width: 960,
+    height: 540,
   });
   // fps表示
   //app.enableStats();
   // 実行
   app.run();
+});
+</script>
+<script>
+let app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello,hibiking!',
+    messages: []
+  },
+  mounted() {
+    socket.on('chat_from_server', (txt) => {
+        console.log(txt);
+        this.messages.push(txt);
+      });
+  },
+  updated() {
+    this.scrollToEnd()
+  },
+  methods: {
+    postChat: function() {
+      socket.emit('chat_from_front', this.message);
+    },
+    scrollToEnd() {
+          this.$nextTick(() => {
+              const chatLog = this.$refs.chatScroll
+              if (!chatLog) return
+              chatLog.scrollTop = chatLog.scrollHeight
+           });
+        }
+    }
 });
 </script>
