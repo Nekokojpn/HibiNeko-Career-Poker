@@ -12,10 +12,62 @@
   <body>
     <script src="https://cdn.jsdelivr.net/gh/phinajs/phina.js@v0.2.3/build/phina.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="./NekoCareerPoker.js"></script>
+    <div class="container">
+      <canvas id = "mycanvas"></canvas>
+      <div class="text-area">
+        <div class="chat-area">
+          chat-area
+        </div>
+        <div class="info-area">
+          game-info
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 
+<style>
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    background-color: black;
+}
+
+.container {
+  display: flex;
+}
+
+#mycanvas {
+  margin: 0 auto;
+  width: 75%;
+  height: 100%;
+  display: inline-block;
+  margin-right: auto;
+}
+
+.text-area {
+  display: inline-block;
+  width: 25%;
+  height: 99vh;
+  border: solid #ff00ff;
+  background-color: #fff;
+}
+
+.chat-area {
+  width: auto;
+  height: 50vh;
+  border: solid green;
+}
+.info-area {
+  width: auto;
+  height: 47.75vh;
+  border: solid blue;
+}
+</style>
 <script>
 // グローバルに展開
 phina.globalize();
@@ -83,6 +135,14 @@ phina.define("MainScene", {
       this.post.alpha = 1.0;
     });
 
+    this.chatField = Shape({
+      width: 400,
+      height: 520
+    });
+    this.chatField.backgroundColor = 'red';
+    this.chatField.addChildTo(this).origin.set(0, 0);
+    this.chatField.setPosition(1520,0);
+
     this.turnFlag = Shape({
       width: 30,
       height: 30
@@ -148,8 +208,12 @@ phina.main(function() {
   var app = GameApp({
     // MainScene から開始
     startLabel: 'main',
-    width: 1080,
-    height: 720,
+    // 表示先のcanvasを指定
+    query: '#mycanvas',
+    // 画面をフィットさせない
+    fit: false,
+    width: 1000,
+    height: 600,
   });
   // fps表示
   //app.enableStats();
