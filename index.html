@@ -18,21 +18,128 @@
 <script>
 // グローバルに展開
 phina.globalize();
+
+//グローバル
+let socket = io();
+let player;
+let labels =  new Array();
+let fontSize = 50;
+document.body.style.cursor = "pointer";
+
 phina.define("MainScene", {
   // 継承
   superClass: 'DisplayScene',
   // 初期化
-  init: function() {
+  init: function(option) {
     // 親クラス初期化
-    this.superInit();
+    this.superInit(option);
     // 背景色
     this.backgroundColor = 'black';
     // 以下にコードを書いていく
+    this.cards = Shape();
+    this.cards.backgroundColor = 'red';
+    this.cards.addChildTo(this);
+    this.cards.setPosition(this.gridX.center(), this.gridY.center());
+    this.cards.setInteractive(true);
+    this.cards.onpointstart = function() {
+          socket.emit('connection_test_from_front', 'cards');
+    };
+    this.cards.on('pointover', (event) => {
+      this.cards.alpha = 0.5;
+    });
+    this.cards.on('pointout', (event) => {
+      this.cards.alpha = 1.0;
+    });
+    
+
+    this.pass =  Shape();
+    this.pass.backgroundColor = 'white';
+    this.pass.addChildTo(this);
+    this.pass.setPosition(this.gridX.center(), this.gridY.center(5));
+    this.pass.setInteractive(false);
+    this.pass.onpointstart = function() {
+          socket.emit('changeTurn', player.ID);
+    };
+    this.pass.on('pointover', (event) => {
+      this.pass.alpha = 0.5;
+    });
+    this.pass.on('pointout', (event) => {
+      this.pass.alpha = 1.0;
+    });
+
+    this.post =  Shape();
+    this.post.backgroundColor = 'green';
+    this.post.addChildTo(this);
+    this.post.setPosition(this.gridX.center(5), this.gridY.center(5));
+    this.post.setInteractive(true);
+    this.post.onpointstart = function() {
+          socket.emit('connection_test_from_front', 'post');
+    };
+    this.post.on('pointover', (event) => {
+      this.post.alpha = 0.5;
+    });
+    this.post.on('pointout', (event) => {
+      this.post.alpha = 1.0;
+    });
+
+    this.turnFlag = Shape({
+      width: 30,
+      height: 30
+    });
+    this.turnFlag.backgroundColor = 'yellow';
+    this.turnFlag.addChildTo(this);
+    this.turnFlag.setPosition(this.gridX.center(-4.8), this.gridY.center(-4.9));
+    this.turnFlag.hide();
+
+
+    this.createLabel(this, 'idText', 'ID:', 'white', fontSize, 10,10);
+    this.createLabel(this, 'turnText', 'TURN:', 'white', fontSize, 10, 100);
+
+   /*
+    * 以下socket
+    */
+
+    //初期socket
+    setTimeout(() => {
+      socket.emit('joinPlayer');
+    }, 100);
+
+    socket.on('joinResponse', (playerInfo) => {
+      player = playerInfo;
+      console.log(player);
+      this.createLabel(this, 'player_id', player.ID, 'white', fontSize, 100, 10);
+      if(player.ID === 0) {
+        this.turnFlag.show();
+        this.pass.setInteractive(true);
+      }
+      else this.pass.hide();
+    });
+
+    socket.on('turnResponse', (nextPlayerId) => {
+      if(player.ID === nextPlayerId) {
+        this.turnFlag.show();
+        this.pass.show();
+        this.pass.setInteractive(true);
+      }
+      else {
+        this.turnFlag.hide();
+        this.pass.hide();
+        this.pass.setInteractive(false);
+      }
+      console.log(nextPlayerId);
+    });
+
+    socket.on('connection_from_server', (txt) => {
+      console.log(txt);
+    });
   },
   // 毎フレーム更新処理
   update: function() {
-    // 以下にコードを書いていく
+
   },
+  createLabel: (self ,_name, _text, _color, _fontSize, _x, _y) => {
+    labels[_name] = Label({text: _text, fill: _color, fontSize: _fontSize, x: _x, y: _y}).addChildTo(self).origin.set(0, 0);
+  }
 });
 
 phina.main(function() {
@@ -40,6 +147,8 @@ phina.main(function() {
   var app = GameApp({
     // MainScene から開始
     startLabel: 'main',
+    width: 1080,
+    height: 720,
   });
   // fps表示
   //app.enableStats();
