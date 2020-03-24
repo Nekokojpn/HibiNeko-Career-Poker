@@ -113,7 +113,7 @@ header .headline{
 }
 
 .chat-input {
-  width: 75%;
+  width: 70%;
 }
 .chat-button {
   width: 20%;
@@ -133,6 +133,7 @@ phina.globalize();
 let socket = io();
 let player;
 let labels =  new Array();
+let roomName;
 let fontSize = 50;
 document.body.style.cursor = "pointer";
 
@@ -152,7 +153,7 @@ phina.define("MainScene", {
     this.cards.setPosition(this.gridX.center(), this.gridY.center());
     this.cards.setInteractive(true);
     this.cards.onpointstart = function() {
-          socket.emit('connection_test_from_front', 'cards');
+          socket.emit('connection_test_from_front', 'cards', roomName);
     };
     this.cards.on('pointover', (event) => {
       this.cards.alpha = 0.5;
@@ -168,7 +169,7 @@ phina.define("MainScene", {
     this.pass.setPosition(this.gridX.center(), this.gridY.center(5));
     this.pass.setInteractive(false);
     this.pass.onpointstart = function() {
-          socket.emit('changeTurn', player.ID);
+          socket.emit('changeTurn', player.ID, roomName);
     };
     this.pass.on('pointover', (event) => {
       this.pass.alpha = 0.5;
@@ -183,7 +184,7 @@ phina.define("MainScene", {
     this.post.setPosition(this.gridX.center(5), this.gridY.center(5));
     this.post.setInteractive(true);
     this.post.onpointstart = function() {
-          socket.emit('connection_test_from_front', 'post');
+          socket.emit('connection_test_from_front', 'post', roomName);
     };
     this.post.on('pointover', (event) => {
       this.post.alpha = 0.5;
@@ -206,7 +207,7 @@ phina.define("MainScene", {
     });
     this.turnFlag.backgroundColor = 'yellow';
     this.turnFlag.addChildTo(this);
-    this.turnFlag.setPosition(this.gridX.center(-4.8), this.gridY.center(-4.9));
+    this.turnFlag.setPosition(this.gridX.center(-4.5), this.gridY.center(-4.0));
     this.turnFlag.hide();
 
 
@@ -222,11 +223,20 @@ phina.define("MainScene", {
       socket.emit('joinPlayer');
     }, 100);
 
+    socket.on('connection_test_from_server', (txt) => {
+      console.log(txt);
+    });
+
+    socket.on('roomResponse', (_roomName) => {
+      roomName = _roomName;
+      console.log(roomName);
+    })
+
     socket.on('joinResponse', (playerInfo) => {
       player = playerInfo;
       console.log(player);
       this.createLabel(this, 'player_id', player.ID, 'white', fontSize, 100, 10);
-      if(player.ID === 0) {
+      if(player.ID % 4 === 0) {
         this.turnFlag.show();
         this.pass.setInteractive(true);
       }
@@ -280,7 +290,7 @@ phina.main(function() {
 let app = new Vue({
   el: '#app',
   data: {
-    message: 'Hello,hibiking!',
+    message: 'Welcome to HibiNeko-Career-Poker!',
     messages: []
   },
   mounted() {
@@ -294,7 +304,7 @@ let app = new Vue({
   },
   methods: {
     postChat: function() {
-      socket.emit('chat_from_front', this.message);
+      socket.emit('chat_from_front', this.message, roomName);
     },
     scrollToEnd() {
           this.$nextTick(() => {
