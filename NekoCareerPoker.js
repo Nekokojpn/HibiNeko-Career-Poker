@@ -17,7 +17,9 @@ class NekoCareerPoker {
     init() {
         this.shuffle();
         this.divide();
-        this.sort(0);
+        //sort client's trump
+        for(let i = 0; i < 4; i++)
+            this.sort(i);
     }
     shuffle() {
         for(let i = 0; i < 53; i++) {
