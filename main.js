@@ -1,13 +1,23 @@
+//ファイル読み込み
+let NekoCareerPoker = require('./NekoCareerPoker.js');
+let poker = new NekoCareerPoker();
+poker.init();//ソートまでされる
+console.log(poker.getCardInfo(0));//カード情報
+console.log(poker.getCardInfo(1));
+console.log(poker.getCardInfo(2));
+console.log(poker.getCardInfo(3));
+
 //サーバ処理
 var express = require('express');
 var app = express();
+app.use('/static', express.static(__dirname + '/public'));
 var http = require('http').Server(app);
 const io = require('socket.io')(http);
 const PORT = process.env.PORT || 3000;
 
 //ルート
 app.get('/' , function(req, res){
-    res.sendFile(__dirname+'/index.html');
+    res.sendFile(__dirname+'/view/index.html');
 });
 
 //サーバ監視
