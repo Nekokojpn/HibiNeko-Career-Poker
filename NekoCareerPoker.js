@@ -122,5 +122,5 @@ class NekoCareerPoker {
         return elms;
     }
 };
-let nk = new NekoCareerPoker();
-nk.init();
+
+module.exports = NekoCareerPoker;
