@@ -8,7 +8,7 @@ class ClientNekoCareerPoker {
     }
     updateSubmittable() {
         if(this.submits === undefined) {
-            console.error("call before setSubmits!");
+            console.error("Call setSubmits and then call updateSubmittable!");
             return;
         }
         if(this.submits.length === 0) {
