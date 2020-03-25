@@ -31,7 +31,10 @@
             <button class="chat-button" v-on:click='postChat'>post</button>
           </div>
           <div class="info-area">
-            game-info
+            <div>ID:{{ player.ID }}</div>
+            <div>name:{{ player.name }}</div>
+            <div>枚数:{{ player.cardRemain }}</div>
+            <div>Turn:{{ player.turnFlag }}</div>
           </div>
         </div>
       </div>
@@ -44,13 +47,17 @@
   el: '#app',
   data: {
     message: 'Welcome to HibiNeko-Career-Poker!',
-    messages: []
+    messages: [],
+    player: ''
   },
-  mounted() {
+  created() {
     socket.on('chat_from_server', (txt) => {
         console.log(txt);
         this.messages.push(txt);
       });
+    socket.on('gameInfo', (_player) => {
+      this.player = _player;
+    });
   },
   updated() {
     this.scrollToEnd()
