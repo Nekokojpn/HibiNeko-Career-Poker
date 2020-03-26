@@ -1,0 +1,49 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <meta name="description" content="${description}" />
+
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/gh/phinajs/phina.js@v0.2.3/build/phina.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </body>
+</html>
+
+<script>
+// グローバルに展開
+phina.globalize();
+phina.define("MainScene", {
+  // 継承
+  superClass: 'DisplayScene',
+  // 初期化
+  init: function() {
+    // 親クラス初期化
+    this.superInit();
+    // 背景色
+    this.backgroundColor = 'black';
+    // 以下にコードを書いていく
+  },
+  // 毎フレーム更新処理
+  update: function() {
+    // 以下にコードを書いていく
+  },
+});
+
+phina.main(function() {
+  // アプリケーションを生成
+  var app = GameApp({
+    // MainScene から開始
+    startLabel: 'main',
+  });
+  // fps表示
+  //app.enableStats();
+  // 実行
+  app.run();
+});
+</script>
