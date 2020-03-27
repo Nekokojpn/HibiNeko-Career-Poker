@@ -7,7 +7,8 @@ const PORT = process.env.PORT || 3000;
 
 //ルート
 app.get('/' , function(req, res){
-    res.sendFile(__dirname+'/index.html');
+   // res.sendFile(__dirname+'/index.html');
+    res.sendFile(__dirname+'/NekoCareerPoker.js');
 });
 
 //サーバ監視
