@@ -50,6 +50,7 @@ class Player {
     constructor(playerCount) {
         this.ID = playerCount;
         this.name = '';
+        this.cardRemain = 13;
         this.turnFlag = false;
     }
 }
