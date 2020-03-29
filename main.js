@@ -18,7 +18,7 @@ http.listen(PORT, function(){
 //ゲーム処理
 let players = new Array();
 let playerCount = 0;
-
+let count = 0;
 //socket
 io.on('connection',function(socket){
     socket.on('connection_test_from_front', (txt) => {
@@ -39,7 +39,12 @@ io.on('connection',function(socket){
         if(nextPlayerId > players.length - 1) nextPlayerId = 0;
         io.emit('turnResponse', nextPlayerId);
         console.log(nextPlayerId);
-    })
+    });
+
+    socket.on('chat_from_front', (message) => {
+        console.log(message);
+        io.emit('chat_from_server', message);
+    });
 
     socket.on('disconnect', () => {
         console.log('disconnect');
