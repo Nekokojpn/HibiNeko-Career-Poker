@@ -18,32 +18,40 @@ http.listen(PORT, function(){
 //ゲーム処理
 let players = new Array();
 let playerCount = 0;
-let count = 0;
+let roomID = 0;
 //socket
 io.on('connection',function(socket){
-    socket.on('connection_test_from_front', (txt) => {
+    //ルーム処理
+    if(playerCount % 4 === 0 && playerCount !== 0) roomID++;
+    var room = 'room' + roomID;
+    socket.join(room);
+    //console.log(io.sockets.adapter.rooms);
+
+    socket.on('connection_test_from_front', (txt, roomName) => {
         console.log(txt);
-        io.emit('connection_from_server', txt);
+        io.to(roomName).emit('connection_test_from_server', txt);
     });
 
     socket.on('joinPlayer', () => {
         let player = new Player(playerCount);
         players.push(player);
-        console.log(player.ID);
         socket.emit('joinResponse', player);
+        socket.emit('roomResponse', room);
         playerCount++;
     });
 
-    socket.on('changeTurn', (player_id) => {
+    socket.on('changeTurn', (player_id, roomName) => {
         let nextPlayerId = player_id + 1;
-        if(nextPlayerId > players.length - 1) nextPlayerId = 0;
-        io.emit('turnResponse', nextPlayerId);
+        if(nextPlayerId % 4 === 0) nextPlayerId -= 4;
+        if(nextPlayerId > players.length - 1) nextPlayerId -= nextPlayerId % 4;
+        io.to(roomName).emit('turnResponse', nextPlayerId);
         console.log(nextPlayerId);
     });
 
-    socket.on('chat_from_front', (message) => {
+    socket.on('chat_from_front', (message,roomName) => {
         console.log(message);
-        io.emit('chat_from_server', message);
+        console.log(roomName);
+        io.to(roomName).emit('chat_from_server', message);
     });
 
     socket.on('disconnect', () => {
