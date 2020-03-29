@@ -60,8 +60,8 @@ class NekoCareerPoker {
                 i = -1;
             
         }
-        console.log(cur);
-        console.log(newones);
+        //console.log(cur);
+        //console.log(newones);
     }
     // index: Integer
     // return type: Array<[char, num]>
@@ -102,7 +102,7 @@ class NekoCareerPoker {
         let cur;
         for(let i = 0, l = this.submits.length; i < l; i++) {
             cur = this.submits[i];
-            let elms = genSubmittableList(cur);           
+            let elms = genSubmittableList(cur);
         }
     }
     genSubmittableList(lists) {
