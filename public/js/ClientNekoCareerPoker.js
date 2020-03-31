@@ -19,4 +19,4 @@ class ClientNekoCareerPoker {
         
     }
 };
-let nk = new ClientNekoCareerPoker();
+//let nk = new ClientNekoCareerPoker();

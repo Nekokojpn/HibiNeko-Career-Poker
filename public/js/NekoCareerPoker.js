@@ -74,58 +74,10 @@ class NekoCareerPoker {
     getCardInfo(index) {
         return this.ones[index];
     }
-    // list: [char, num]
-    // return type: Integer - Failed = -1 
-    find(index, list) {
-        for(let i = 0, l = this.ones[index].length; i < l; i++) {
-            if(this.ones[index][i][1] == list[1] && this.ones[index][i][0] == list[0])
-                return i;
-        }
-        return -1;
-    }
-    // list: Array<[char, num]>
-    submit(index, lists) {
-        this.submits.length = 0;
-        for(let i = 0, l = list.length; i < l; i++) {
-            let t = find(index, list[i]);
-            if(t != -1) {
-                if(isSubmittable(this.ones[index][t])) {
-                    this.submits.push(this.ones[index][t]);
-                    this.ones[index].splice(t, 1);
-                }
-                else {
-                    console.error("May be system bug!\nassertion failed! isSubmittable(...) == true");
-                }
-            }
-            else {
-                console.error("May be system bug!\nassertion failed! find(...) == true");
-            }
-        }
-
-    }
-    // list: [char, num]
-    isSubmittable(list) {
-        let cur;
-        for(let i = 0, l = this.submits.length; i < l; i++) {
-            cur = this.submits[i];
-            let elms = genSubmittableList(cur);
-        }
-    }
-    genSubmittableList(lists) {
-        let elms = new Array();
-        for(let i = list[1] + 1 != 14 ? list[1] + 1 : 1, flg = false; !flg; i++) {
-            if(i == 13)
-                i = 0;
-            if(i == 2)
-                i = -1;
-            elms.push('A', i);
-            if(i == 0)
-                flg = true;
-        }
-        elms.push(list[0], list[1] - 1);
-        return elms;
-    }
 };
+//Debug 
+/*
 let nk = new NekoCareerPoker();
 nk.init();
+*/
 module.exports = NekoCareerPoker;
