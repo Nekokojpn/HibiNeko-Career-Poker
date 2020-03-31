@@ -56,13 +56,20 @@ var ASSETS = {
     "H11":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust50.png",
     "H12":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust51.png",
     "H13":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust52.png",
+    "J14":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust53.png",
   },
 };
 //グローバル
 let socket = io();
 let player;
+let players = new Array();
 let labels =  new Array();
 let roomName;
+let trumps;
+let trumpSprites = new Array();
+let postTrumps = new Array();
+let stageTrumps = new Array();
+let stageTrumpSprites = new Array();
 let fontSize = 50;
 document.body.style.cursor = "pointer";
 
@@ -75,78 +82,78 @@ phina.define("MainScene", {
     this.superInit(option);
     // 背景色
     this.backgroundColor = 'black';
-    // 以下にコードを書いていく
-    this.cards = Shape();
-    this.cards.backgroundColor = 'red';
-    this.cards.addChildTo(this);
-    this.cards.setPosition(this.gridX.center(), this.gridY.center());
-    this.cards.setInteractive(true);
-    this.cards.onpointstart = function() {
-          socket.emit('connection_test_from_front', 'cards', roomName);
-    };
-    this.cards.on('pointover', (event) => {
-      this.cards.alpha = 0.5;
-    });
-    this.cards.on('pointout', (event) => {
-      this.cards.alpha = 1.0;
-    });
     
-
-    this.pass =  Shape();
-    this.pass.backgroundColor = 'white';
+    this.pass =  Shape({
+      width: 200,
+      height: 50
+    });
+    this.pass.backgroundColor = 'green';
     this.pass.addChildTo(this);
-    this.pass.setPosition(this.gridX.center(), this.gridY.center(5));
+    this.pass.setPosition(this.gridX.center(-5), this.gridY.center(6.8));
     this.pass.setInteractive(false);
     this.pass.onpointstart = function() {
           socket.emit('changeTurn', player.ID, roomName);
     };
-    this.pass.on('pointover', (event) => {
+    this.pass.on('pointover', () => {
       this.pass.alpha = 0.5;
     });
-    this.pass.on('pointout', (event) => {
+    this.pass.on('pointout', () => {
       this.pass.alpha = 1.0;
     });
 
-    this.post =  Shape();
-    this.post.backgroundColor = 'green';
+    this.post =  Shape({
+      width: 200,
+      height: 50
+    });
+    this.post.backgroundColor = 'red';
     this.post.addChildTo(this);
-    this.post.setPosition(this.gridX.center(5), this.gridY.center(5));
-    this.post.setInteractive(true);
+    this.post.setPosition(this.gridX.center(5), this.gridY.center(6.8));
+    this.post.setInteractive(false);
     this.post.onpointstart = function() {
-          socket.emit('connection_test_from_front', 'post', roomName);
+          socket.emit('postTrumps', postTrumps, roomName);
+          socket.emit('changeTurn', player.ID, roomName);
     };
-    this.post.on('pointover', (event) => {
+    this.post.on('pointover', () => {
       this.post.alpha = 0.5;
     });
-    this.post.on('pointout', (event) => {
+    this.post.on('pointout', () => {
       this.post.alpha = 1.0;
     });
-
-    this.chatField = Shape({
-      width: 400,
-      height: 520
-    });
-    this.chatField.backgroundColor = 'red';
-    this.chatField.addChildTo(this).origin.set(0, 0);
-    this.chatField.setPosition(1520,0);
 
     this.turnFlag = Shape({
       width: 30,
       height: 30
     });
-    this.turnFlag.backgroundColor = 'yellow';
-    this.turnFlag.addChildTo(this);
-    this.turnFlag.setPosition(this.gridX.center(-4.5), this.gridY.center(-4.0));
-    this.turnFlag.hide();
+    
+    this.opponent =  Shape({
+      width: 400,
+      height: 75
+    });
+    this.opponent.backgroundColor = 'white';
+    this.opponent.addChildTo(this);
+    this.opponent.setPosition(this.gridX.center(5), this.gridY.center(-7.0));
+
+    this.opponent2 =  Shape({
+      width: 400,
+      height: 75
+    });
+    this.opponent2.backgroundColor = 'white';
+    this.opponent2.addChildTo(this);
+    this.opponent2.setPosition(this.gridX.center(0), this.gridY.center(-7.0));
+
+    this.opponent3 =  Shape({
+      width: 400,
+      height: 75
+    });
+    this.opponent3.backgroundColor = 'white';
+    this.opponent3.addChildTo(this);
+    this.opponent3.setPosition(this.gridX.center(-5), this.gridY.center(-7.0));
 
 
-    this.createLabel(this, 'idText', 'ID:', 'white', fontSize, 10,10);
-    this.createLabel(this, 'turnText', 'TURN:', 'white', fontSize, 10, 100);
-
-    this.sprite = Sprite('H9').addChildTo(this);
-    this.sprite.x = this.gridX.center();
-    this.sprite.y = this.gridY.center();
-    this.sprite.setScale(0.1);
+    //this.createLabel(this, 'idText', 'ID:', 'white', fontSize, 10,10);
+    //this.createLabel(this, 'turnText', 'TURN:', 'white', fontSize, 10, 100);
+    this.createLabel(this, 'postText', 'POST', 'white', 60, 1085, 705);
+    this.createLabel(this, 'passText', 'PASS', 'white', 60, 185, 705);
 
    /*
     * 以下ゲームのsocket
@@ -154,7 +161,8 @@ phina.define("MainScene", {
 
     //初期socket
     setTimeout(() => {
-      socket.emit('joinPlayer');
+      socket.emit('joinPlayer', window.prompt("なまえをにゅうりょくしてね！", ""));
+      socket.emit('requestTrump');
     }, 100);
 
     socket.on('connection_test_from_server', (txt) => {
@@ -163,18 +171,33 @@ phina.define("MainScene", {
 
     socket.on('roomResponse', (_roomName) => {
       roomName = _roomName;
-      console.log(roomName);
-    })
+    });
 
-    socket.on('joinResponse', (playerInfo) => {
-      player = playerInfo;
-      console.log(player);
-      this.createLabel(this, 'player_id', player.ID, 'white', fontSize, 100, 10);
+    socket.on('joinResponse', (_player) => {
+      player = _player;
+      //this.createLabel(this, 'player_id', player.ID, 'white', fontSize, 100, 10);
       if(player.ID % 4 === 0) {
         this.turnFlag.show();
         this.pass.setInteractive(true);
+        this.post.setInteractive(true);
       }
-      else this.pass.hide();
+      else {
+        this.pass.hide();
+        this.post.hide();
+      }
+    });
+
+    socket.on('joinOpponent', (_players) => {
+      players = _players;
+      players = players.filter((val) => {
+        return val.ID !== player.ID; 
+      })
+      this.createOpponentLabel(this);
+      console.log(players);
+    });
+    socket.on('getTrump', (_trumps) => {
+      trumps = _trumps;
+      this.createPlayerTrumps(this);
     });
 
     socket.on('turnResponse', (nextPlayerId) => {
@@ -182,16 +205,26 @@ phina.define("MainScene", {
         this.turnFlag.show();
         this.pass.show();
         this.pass.setInteractive(true);
+        this.post.show();
+        this.post.setInteractive(true);
       }
       else {
         this.turnFlag.hide();
         this.pass.hide();
         this.pass.setInteractive(false);
+        this.post.hide();
+        this.post.setInteractive(false);
       }
       console.log(nextPlayerId);
     });
 
-    
+    socket.on('stageTrumps', (_stageTrumps) => {
+      this.clearStageTrumps(this);
+      stageTrumps = _stageTrumps;
+      this.createStageTrumps(this);
+      console.log(stageTrumps);
+    });
+
   },
   // 毎フレーム更新処理
   update: function() {
@@ -199,8 +232,78 @@ phina.define("MainScene", {
   },
   createLabel: (self ,_name, _text, _color, _fontSize, _x, _y) => {
     labels[_name] = Label({text: _text, fill: _color, fontSize: _fontSize, x: _x, y: _y}).addChildTo(self).origin.set(0, 0);
+  },
+  createPlayerTrumps: (self) => {
+    for(let i = 0; i < trumps.length; i++){
+      //trumpSprites[_name] =
+      let trumpMark = trumps[i][0];
+      let trumpNum = trumps[i][1];
+      let trump = trumpMark + trumpNum;
+      
+      let trumpSprite = Sprite(trump).addChildTo(self);
+      trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
+      trumpSprite.y = self.gridY.center(3.0);
+      trumpSprite.setScale(0.2);
+      trumpSprite.clickFlag = false;
+
+      trumpSprites.push(trumpSprite);
+      trumpSprite.setInteractive(true);
+      trumpSprite.onpointstart = function() {
+        // 削除
+        if(!trumpSprite.clickFlag) {
+          trumpSprite.y = self.gridY.center(2.5);
+          trumpSprite.clickFlag = true
+          postTrumps.push(trump);
+          console.log(postTrumps);
+        }else {
+          trumpSprite.y = self.gridY.center(3.0);
+          trumpSprite.clickFlag = false
+          postTrumps = postTrumps.filter((val) => {
+            return val != trump;
+          });
+          console.log(postTrumps);
+        }
+      };
+      trumpSprite.on('pointover', () => {
+        trumpSprite.alpha = 0.8;
+      });
+      trumpSprite.on('pointout', () => {
+        trumpSprite.alpha = 1.0;
+      });
+      console.log(trump); 
+    }
+  },
+  createStageTrumps: (self) => {
+    for(let i = 0; i < stageTrumps.length; i++) {
+      let trump = stageTrumps[i];
+      let trumpSprite = Sprite(trump).addChildTo(self);
+      trumpSprite.x = self.gridX.span(i * 1.05 + 5);
+      trumpSprite.y = self.gridY.center(-2.5);
+      trumpSprite.setScale(0.175);
+
+      stageTrumpSprites.push(trumpSprite);
+    }
+  },
+  clearStageTrumps: (self) => {
+    for(let i = 0; i < stageTrumpSprites.length; i++) {
+      console.log(stageTrumpSprites.length);
+      stageTrumpSprites[i].remove();
+    }
+    stageTrumpSprites = new Array();
+  },
+  createOpponentLabel: (self) => {
+    for(let i = 0; i < players.length; i++) {
+      self.createLabel(self, players[i].name, players[i].name, 'black', fontSize, 450 * i + 75, 10);
+    }
   }
 });
+
+/*
+this.sprite = Sprite('H9').addChildTo(this);
+    this.sprite.x = this.gridX.center();
+    this.sprite.y = this.gridY.center();
+    this.sprite.setScale(0.1);
+*/
 
 phina.main(function() {
   // アプリケーションを生成
@@ -213,8 +316,8 @@ phina.main(function() {
     query: '#mycanvas',
     // 画面をフィットさせない
     fit: false,
-    width: 960,
-    height: 540,
+    width: 1440,
+    height: 810,
   });
   // fps表示
   //app.enableStats();
