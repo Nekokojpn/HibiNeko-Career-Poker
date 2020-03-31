@@ -3,12 +3,12 @@ class NekoCareerPoker {
         this.trumps = new Array(4);
         this.trumps.push(new Array());
         this.cardinfo = new Array(53);
-        let li = ['S', 'C', 'H', 'D'];
+        this.li = ['S', 'C', 'H', 'D'];
         let cnt = 0;
         for(let i = 0; i < 52; i++) {
             if(i != 0 && i % 13 == 0)
                 cnt++;
-            this.cardinfo[i] = [li[cnt], i % 13 + 1];
+            this.cardinfo[i] = [this.li[cnt], i % 13 + 1];
         }
         this.cardinfo[52] = ['J', 14];
         this.submits = new Array();
@@ -40,9 +40,9 @@ class NekoCareerPoker {
     sort(index) {
         let cur = this.ones[index];
         let t = new Array();
+        let st = new Array();
         let newones = new Array(cur.length);
-        let pos = 0;
-        for(let i = 3, flg = false; !flg; i++) {
+        for(let i = 3, flg = false, pos = 0; !flg; i++) {
             if(i == 0)
                 flg = true;
             for(let j = 0, l = cur.length; j < l; j++) {
@@ -50,20 +50,24 @@ class NekoCareerPoker {
                     t.push(j);
             }
             //Insert sort code here which kind of trump
+            for(let j = 0, l = this.li.length; j < l; j++) {
+                for(let k = 0, ll = t.length; k < ll; k++) {
+                    if(cur[t[k]][0] == this.li[j])
+                        st.push(cur[t[k]]);
+                }
+            }
             
-            
-            for(let j = 0, l = t.length; j < l; j++) {
-                newones[pos++] = cur[t[j]];
+            for(let j = 0, l = st.length; j < l; j++) {
+                newones[pos++] = st[j];
             }
             t.length = 0;
             if(i == 13)
                 i = 0;
             if(i == 2)
                 i = -1;
-            
         }
-        //console.log(cur);
-        //console.log(newones);
+        console.log(st);
+        this.ones[index] = st;
     }
     // index: Integer
     // return type: Array<[char, num]>
@@ -122,5 +126,6 @@ class NekoCareerPoker {
         return elms;
     }
 };
-
+let nk = new NekoCareerPoker();
+nk.init();
 module.exports = NekoCareerPoker;
