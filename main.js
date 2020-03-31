@@ -1,5 +1,5 @@
 //ファイル読み込み
-let NekoCareerPoker = require('./NekoCareerPoker.js');
+let NekoCareerPoker = require('./public/js/NekoCareerPoker.js');
 let poker = new NekoCareerPoker();
 poker.init();//ソートまでされる
 console.log(poker.getCardInfo(0));//カード情報
@@ -33,7 +33,7 @@ let roomID = 0;
 io.on('connection',function(socket){
     //ルーム処理
     if(playerCount % 4 === 0 && playerCount !== 0) roomID++;
-    var room = 'room' + roomID;
+    let room = 'room' + roomID;
     socket.join(room);
     //console.log(io.sockets.adapter.rooms);
 
@@ -42,12 +42,20 @@ io.on('connection',function(socket){
         io.to(roomName).emit('connection_test_from_server', txt);
     });
 
-    socket.on('joinPlayer', () => {
-        let player = new Player(playerCount);
+    socket.on('joinPlayer', (postName) => {
+        let player = new Player(playerCount,postName, roomID);
         players.push(player);
         socket.emit('joinResponse', player);
+        io.to(room).emit('joinOpponent', players.filter((val) => {
+            return val.roomID === player.roomID;  
+        }));
         socket.emit('roomResponse', room);
+        socket.emit('gameInfo', player);
         playerCount++;
+    });
+
+    socket.on('requestTrump', () => {
+        socket.emit('getTrump', poker.getCardInfo(3));
     });
 
     socket.on('changeTurn', (player_id, roomName) => {
@@ -57,6 +65,11 @@ io.on('connection',function(socket){
         io.to(roomName).emit('turnResponse', nextPlayerId);
         console.log(nextPlayerId);
     });
+
+    socket.on('postTrumps', (postTrumps, roomName) => {
+        io.to(roomName).emit('stageTrumps', postTrumps);
+        console.log(postTrumps);
+    })
 
     socket.on('chat_from_front', (message,roomName) => {
         console.log(message);
@@ -70,9 +83,10 @@ io.on('connection',function(socket){
 });
 
 class Player {
-    constructor(playerCount) {
-        this.ID = playerCount;
-        this.name = '';
+    constructor(_playerCount, _playerName, _roomID) {
+        this.ID = _playerCount;
+        this.name = _playerName;
+        this.roomID = _roomID;
         this.cardRemain = 13;
         this.turnFlag = false;
     }
