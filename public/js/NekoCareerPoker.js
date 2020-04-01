@@ -1,18 +1,17 @@
+const li = ['S', 'C', 'H', 'D', 'J'];
 class NekoCareerPoker {
     constructor() {
         this.trumps = new Array(4);
         this.trumps.push(new Array());
         this.cardinfo = new Array(53);
-        this.li = ['S', 'C', 'H', 'D'];
         let cnt = 0;
         for(let i = 0; i < 52; i++) {
             if(i != 0 && i % 13 == 0)
                 cnt++;
-            this.cardinfo[i] = [this.li[cnt], i % 13 + 1];
+            this.cardinfo[i] = [li[cnt], i % 13 + 1];
         }
         this.cardinfo[52] = ['J', 14];
         this.submits = new Array();
-        this.li.push('J');
     }
     //init method works with shuffle and divide method.
     init() {
@@ -43,16 +42,14 @@ class NekoCareerPoker {
         let t = new Array();
         let st = new Array();
         let newones = new Array(cur.length);
-        for(let i = 3, flg = false, pos = 0; !flg; i++) {
-            if(i == 0)
-                flg = true;
+        for(let i = 3, pos = 0; ; i++) {
             for(let j = 0, l = cur.length; j < l; j++) {
                 if(i === cur[j][1])
                     t.push(j);
             }
-            for(let j = 0, l = this.li.length; j < l; j++) {
+            for(let j = 0, l = li.length; j < l; j++) {
                 for(let k = 0, ll = t.length; k < ll; k++) {
-                    if(cur[t[k]][0] == this.li[j])
+                    if(cur[t[k]][0] == li[j])
                         st.push(cur[t[k]]);
                 }
             }
@@ -66,9 +63,9 @@ class NekoCareerPoker {
             else if(i == 2)
                 i = 13;
             else if(i == 14)
-                i = -1;
+                break;
         }
-        console.log(st);
+        //console.log(st);
         this.ones[index] = st;
     }
     // index: Integer
@@ -82,4 +79,5 @@ class NekoCareerPoker {
 let nk = new NekoCareerPoker();
 nk.init();
 */
+
 module.exports = NekoCareerPoker;
