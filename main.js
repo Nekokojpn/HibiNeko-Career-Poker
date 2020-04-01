@@ -47,7 +47,7 @@ io.on('connection',function(socket){
 
     socket.on('joinPlayer', (postName) => {
         let trumps = poker.getCardInfo(playerCount % 4);
-        let player = new Player(playerCount,postName, roomID, trumps.length);
+        let player = new Player(playerCount,postName, roomID, trumps.length, room);
         players.push(player);
         socket.emit('joinResponse', player);
         io.to(room).emit('joinOpponent', players.filter((val) => {
@@ -71,16 +71,23 @@ io.on('connection',function(socket){
         console.log(nextPlayerId);
     });
 
-    socket.on('postTrumps', (postTrumps, roomName) => {
-        io.to(roomName).emit('stageTrumps', postTrumps);
-        socket.emit('changeViewTurn', postTrumps.length);
-        console.log(postTrumps);
+    socket.on('postTrumps', (player_id, postTrumps) => {
+        let player = players.find((val) => val.ID === player_id);
+        player.cardRemain -= postTrumps.length;
+        for(let i = 0; i < players.length; i++) {
+            if(players[i].ID === player.ID) players[i] = player;
+        }
+        let opponents = players.filter((val) => val.roomName === player.roomName);
+        io.to(player.roomName).emit('stageTrumps', postTrumps);
+        io.to(player.roomName).emit('changeOpponentLabel', opponents);
+        socket.emit('changeViewTurn', player);
     });
 
     socket.on('chat_from_front', (message,roomName) => {
         console.log(message);
         console.log(roomName);
         io.to(roomName).emit('chat_from_server', message);
+        io.to(roomName).emit('changeViewTurn');
     });
 
     socket.on('disconnect', () => {
@@ -89,11 +96,12 @@ io.on('connection',function(socket){
 });
 
 class Player {
-    constructor(_playerCount, _playerName, _roomID, _cardRemain) {
+    constructor(_playerCount, _playerName, _roomID, _cardRemain, _roomName) {
         this.ID = _playerCount;
         this.name = _playerName;
         this.roomID = _roomID;
         this.cardRemain = _cardRemain;
         this.turnFlag = false;
+        this.roomName = _roomName
     }
 }

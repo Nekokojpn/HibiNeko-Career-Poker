@@ -58,8 +58,8 @@
     socket.on('gameInfo', (_player) => {
       this.player = _player;
     });
-    socket.on('changeViewTurn', (_cardRemain) => {
-      this.player.cardRemain -= _cardRemain;
+    socket.on('changeViewTurn', (_player) => {
+      this.player = _player;
     });
   },
   updated() {
