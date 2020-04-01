@@ -12,6 +12,7 @@ class NekoCareerPoker {
         }
         this.cardinfo[52] = ['J', 14];
         this.submits = new Array();
+        this.li.push('J');
     }
     //init method works with shuffle and divide method.
     init() {
@@ -49,7 +50,6 @@ class NekoCareerPoker {
                 if(i === cur[j][1])
                     t.push(j);
             }
-            //Insert sort code here which kind of trump
             for(let j = 0, l = this.li.length; j < l; j++) {
                 for(let k = 0, ll = t.length; k < ll; k++) {
                     if(cur[t[k]][0] == this.li[j])
@@ -63,7 +63,9 @@ class NekoCareerPoker {
             t.length = 0;
             if(i == 13)
                 i = 0;
-            if(i == 2)
+            else if(i == 2)
+                i = 13;
+            else if(i == 14)
                 i = -1;
         }
         console.log(st);
