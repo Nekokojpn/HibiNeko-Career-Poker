@@ -53,7 +53,7 @@ class NekoCareerPoker {
                         st.push(cur[t[k]]);
                 }
             }
-            
+            st.forEach(elm => newones[pos++] = elm);
             for(let j = 0, l = st.length; j < l; j++) {
                 newones[pos++] = st[j];
             }
