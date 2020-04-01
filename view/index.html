@@ -21,8 +21,8 @@
             <a>HibiNeko-Career-Poker</a>
           </h1>
         </header>
-        <canvas id = "mycanvas"></canvas>
-        <div class="text-area">
+          <canvas id = "mycanvas"></canvas>
+          <div class="text-area">
           <div class="chat-area" ref="chatScroll">
             <div v-for="chatMessage in messages" v-bind:key="chatMessage.id">{{ chatMessage }}</div>
           </div>
@@ -57,6 +57,9 @@
       });
     socket.on('gameInfo', (_player) => {
       this.player = _player;
+    });
+    socket.on('changeViewTurn', (_cardRemain) => {
+      this.player.cardRemain -= _cardRemain;
     });
   },
   updated() {

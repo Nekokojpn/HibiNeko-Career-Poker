@@ -109,9 +109,11 @@ phina.define("MainScene", {
     this.post.addChildTo(this);
     this.post.setPosition(this.gridX.center(5), this.gridY.center(6.8));
     this.post.setInteractive(false);
-    this.post.onpointstart = function() {
+    this.post.onpointstart = () => {
           socket.emit('postTrumps', postTrumps, roomName);
           socket.emit('changeTurn', player.ID, roomName);
+          this.clearPlayerTrumps();
+          this.createPlayerTrumps(this);
     };
     this.post.on('pointover', () => {
       this.post.alpha = 0.5;
@@ -124,7 +126,7 @@ phina.define("MainScene", {
       width: 30,
       height: 30
     });
-    
+
     this.opponent =  Shape({
       width: 400,
       height: 75
@@ -149,7 +151,6 @@ phina.define("MainScene", {
     this.opponent3.addChildTo(this);
     this.opponent3.setPosition(this.gridX.center(-5), this.gridY.center(-7.0));
 
-
     //this.createLabel(this, 'idText', 'ID:', 'white', fontSize, 10,10);
     //this.createLabel(this, 'turnText', 'TURN:', 'white', fontSize, 10, 100);
     this.createLabel(this, 'postText', 'POST', 'white', 60, 1085, 705);
@@ -162,7 +163,7 @@ phina.define("MainScene", {
     //初期socket
     setTimeout(() => {
       socket.emit('joinPlayer', window.prompt("なまえをにゅうりょくしてね！", ""));
-      socket.emit('requestTrump');
+      //socket.emit('requestTrump');
     }, 100);
 
     socket.on('connection_test_from_server', (txt) => {
@@ -193,8 +194,9 @@ phina.define("MainScene", {
         return val.ID !== player.ID; 
       })
       this.createOpponentLabel(this);
-      console.log(players);
+      //console.log(players);
     });
+
     socket.on('getTrump', (_trumps) => {
       trumps = _trumps;
       this.createPlayerTrumps(this);
@@ -215,14 +217,14 @@ phina.define("MainScene", {
         this.post.hide();
         this.post.setInteractive(false);
       }
-      console.log(nextPlayerId);
+      //console.log(nextPlayerId);
     });
 
     socket.on('stageTrumps', (_stageTrumps) => {
       this.clearStageTrumps(this);
       stageTrumps = _stageTrumps;
       this.createStageTrumps(this);
-      console.log(stageTrumps);
+      //console.log(stageTrumps);
     });
 
   },
@@ -244,6 +246,7 @@ phina.define("MainScene", {
       trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
       trumpSprite.y = self.gridY.center(3.0);
       trumpSprite.setScale(0.2);
+      trumpSprite.name = trump;
       trumpSprite.clickFlag = false;
 
       trumpSprites.push(trumpSprite);
@@ -254,14 +257,14 @@ phina.define("MainScene", {
           trumpSprite.y = self.gridY.center(2.5);
           trumpSprite.clickFlag = true
           postTrumps.push(trump);
-          console.log(postTrumps);
+          //console.log(postTrumps);
         }else {
           trumpSprite.y = self.gridY.center(3.0);
           trumpSprite.clickFlag = false
           postTrumps = postTrumps.filter((val) => {
             return val != trump;
           });
-          console.log(postTrumps);
+          //console.log(postTrumps);
         }
       };
       trumpSprite.on('pointover', () => {
@@ -270,8 +273,35 @@ phina.define("MainScene", {
       trumpSprite.on('pointout', () => {
         trumpSprite.alpha = 1.0;
       });
-      console.log(trump); 
+      //console.log(trump); 
     }
+  },
+  clearPlayerTrumps: () => {
+    let clearTrumps = new Array();
+    for(let i = 0; i < postTrumps.length; i++) {
+      let clearTrump = new Array();
+      let trumpMark = postTrumps[i].substr(0, 1);
+      let trumpNum = Number(postTrumps[i].substr(1));
+  
+      clearTrump.push(trumpMark);
+      clearTrump.push(trumpNum);
+      clearTrumps.push(clearTrump);
+    }
+
+    console.log(trumps);
+    for(let i = 0; i < clearTrumps.length; i++) {
+      trumps = trumps.filter((val) => {
+        //console.log(JSON.stringify(val) == JSON.stringify(clearTrumps[i]));
+        return JSON.stringify(val) !== JSON.stringify(clearTrumps[i]);
+      });
+    }
+    
+    for(let i = 0; i < trumpSprites.length; i++) {
+      trumpSprites[i].remove();
+    }
+
+    trumpSprites = new Array();
+    postTrumps = new Array();
   },
   createStageTrumps: (self) => {
     for(let i = 0; i < stageTrumps.length; i++) {
@@ -280,24 +310,27 @@ phina.define("MainScene", {
       trumpSprite.x = self.gridX.span(i * 1.05 + 5);
       trumpSprite.y = self.gridY.center(-2.5);
       trumpSprite.setScale(0.175);
-
       stageTrumpSprites.push(trumpSprite);
     }
   },
   clearStageTrumps: (self) => {
     for(let i = 0; i < stageTrumpSprites.length; i++) {
-      console.log(stageTrumpSprites.length);
+      ///console.log(stageTrumpSprites.length);
       stageTrumpSprites[i].remove();
     }
     stageTrumpSprites = new Array();
   },
   createOpponentLabel: (self) => {
     for(let i = 0; i < players.length; i++) {
-      self.createLabel(self, players[i].name, players[i].name, 'black', fontSize, 450 * i + 75, 10);
+      let name = players[i].name + '(' + players[i].cardRemain +')';
+      self.createLabel(self, players[i].ID, name, 'black', fontSize, 450 * i + 75, 10);
     }
+    let ID = players[0].ID;
+    console.log(labels[ID]);
+    //labels[]
   }
 });
-
+//+ '(' + player.remainTrump + ')'
 /*
 this.sprite = Sprite('H9').addChildTo(this);
     this.sprite.x = this.gridX.center();

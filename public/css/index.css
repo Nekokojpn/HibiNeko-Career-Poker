@@ -42,12 +42,11 @@ header .headline{
 #mycanvas {
   margin: 0 auto;
   width: 60%;
-  height: 50%;
+  height: 70%;
   display: inline-block;
-  margin-right: auto;
   margin-left: auto;
+  margin-right: auto;
   margin-top: 5%;
-  border: solid red;
 }
 
 .text-area {
@@ -81,5 +80,37 @@ header .headline{
 .info-area {
   width: auto;
   height: 42.0vh;
+  border: solid blue;
+}
+
+.gameArea {
+  display: inline-block;
+  width: 74%;
+}
+.opponent-label-1 {
+  position: relative;
+  top: 10%;
+  left: 10%;
+  width: 30%;
+  height: 30%;
+  background-color: black;
+  border: solid blue;
+}
+
+.opponent-label-2 {
+  position: relative;
+  top: 17%;
+  left: 10%;
+  width: 30%;
+  background-color: black;
+  border: solid blue;
+}
+
+.opponent-label-3 {
+  position: relative;
+  top: 17%;
+  left: 10%;
+  width: 30%;
+  background-color: black;
   border: solid blue;
 }

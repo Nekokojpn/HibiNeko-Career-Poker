@@ -2,10 +2,10 @@
 let NekoCareerPoker = require('./public/js/NekoCareerPoker.js');
 let poker = new NekoCareerPoker();
 poker.init();//ソートまでされる
-console.log(poker.getCardInfo(0));//カード情報
-console.log(poker.getCardInfo(1));
-console.log(poker.getCardInfo(2));
-console.log(poker.getCardInfo(3));
+//console.log(poker.getCardInfo(0));//カード情報
+//console.log(poker.getCardInfo(1));
+//console.log(poker.getCardInfo(2));
+//console.log(poker.getCardInfo(3));
 
 //サーバ処理
 var express = require('express');
@@ -32,7 +32,10 @@ let roomID = 0;
 //socket
 io.on('connection',function(socket){
     //ルーム処理
-    if(playerCount % 4 === 0 && playerCount !== 0) roomID++;
+    if(playerCount % 4 === 0 && playerCount !== 0) {
+        roomID++;
+        poker.init();
+    }
     let room = 'room' + roomID;
     socket.join(room);
     //console.log(io.sockets.adapter.rooms);
@@ -43,7 +46,8 @@ io.on('connection',function(socket){
     });
 
     socket.on('joinPlayer', (postName) => {
-        let player = new Player(playerCount,postName, roomID);
+        let trumps = poker.getCardInfo(playerCount % 4);
+        let player = new Player(playerCount,postName, roomID, trumps.length);
         players.push(player);
         socket.emit('joinResponse', player);
         io.to(room).emit('joinOpponent', players.filter((val) => {
@@ -51,6 +55,7 @@ io.on('connection',function(socket){
         }));
         socket.emit('roomResponse', room);
         socket.emit('gameInfo', player);
+        socket.emit('getTrump', trumps);
         playerCount++;
     });
 
@@ -68,8 +73,9 @@ io.on('connection',function(socket){
 
     socket.on('postTrumps', (postTrumps, roomName) => {
         io.to(roomName).emit('stageTrumps', postTrumps);
+        socket.emit('changeViewTurn', postTrumps.length);
         console.log(postTrumps);
-    })
+    });
 
     socket.on('chat_from_front', (message,roomName) => {
         console.log(message);
@@ -83,11 +89,11 @@ io.on('connection',function(socket){
 });
 
 class Player {
-    constructor(_playerCount, _playerName, _roomID) {
+    constructor(_playerCount, _playerName, _roomID, _cardRemain) {
         this.ID = _playerCount;
         this.name = _playerName;
         this.roomID = _roomID;
-        this.cardRemain = 13;
+        this.cardRemain = _cardRemain;
         this.turnFlag = false;
     }
 }
