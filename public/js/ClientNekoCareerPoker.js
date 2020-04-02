@@ -78,6 +78,10 @@ class ClientNekoCareerPoker {
         return can;
     }
     submit() {
+        if(this.submits.length !== this.selects.length) {
+            console.log("ちゃんと選べバーカ");
+            return null;
+        }
         this.sort(this.f_submits);
         this.sort(this.f_selects);
         let map = new Map([
@@ -150,6 +154,7 @@ class ClientNekoCareerPoker {
     }
 };
 module.exports = ClientNekoCareerPoker;
+
 /*
 let test = [[ 'C', 4 ],  [ 'C', 5 ],
 [ 'S', 8 ],  [ 'C', 9 ],
@@ -161,9 +166,14 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ],
 let nk = new ClientNekoCareerPoker(test);
 nk.setSubmits([['C', 3], ['H', 3]]);
 nk.updateSubmittable();
+console.log(nk.trumps);
 nk.select(['C', 9]);
+console.log(nk.trumps);
 nk.select(['H', 9]);
-nk.submit();
+console.log(nk.trumps);
+nk.trumps.forEach(elm => console.log(elm.isSubmittable));
 */
+//console.log(nk.submit());
+
 //console.log(nk.trumps);
 //console.log(nk.submits);
