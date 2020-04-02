@@ -80,17 +80,43 @@ class ClientNekoCareerPoker {
     submit() {
         this.sort(this.f_submits);
         this.sort(this.f_selects);
+        let map = new Map([
+            ['restrict', this.restrict],
+            [5, this.five],
+            [7, this.seven],
+            [10, this.ten],
+            [11, this.isJBack]
+        ]);
+        console.log("縛り: " + this.restrict);
+        console.log("5スキップ: " + this.five);
+        console.log("7渡し: " + this.seven);
+        console.log("10捨て: " + this.ten);
+        console.log("Jバック: " + this.isJBack);
         this.f_submits.length = 0;
-        this.f_selects.forEach(elm => this.f_submits.push(new Trump(elm.kind, elm.rank)));
-        console.log("Restrict: " + this.isRestrict());
-        console.log("7 discard: ");
+        this.f_selects.forEach(elm => this.submits.push(new Trump(elm.kind, elm.rank)));
+        return map;
     }
-    isRestrict() {
+    //Return type: null | array
+    get restrict() {
         for(let i = 0, l = this.submits.length; i < l; i++) {
             if(this.selects[i].kind !== this.submits[i].kind)
-                return false;
+                return null;
         }
-        return true;
+        let restrictKind = new Array();
+        this.selects.forEach(elm => restrictKind.push(this.kind.getKindChar(elm.kind)));
+        return restrictKind;
+    }
+    get five() { return this.countNumber(5) }
+    get seven() { return this.countNumber(7) }
+    get ten() { return this.countNumber(10) }
+    get isJBack() { return this.selects.some(elm => elm.rank === 11) }
+    countNumber(n) {
+        let i = 0;
+        this.submits.forEach(elm => {
+            if(elm.rank === n)
+                i++;
+        });
+        return i;
     }
     sort(lists) {
         let cur = lists;
@@ -124,6 +150,7 @@ class ClientNekoCareerPoker {
     }
 };
 module.exports = ClientNekoCareerPoker;
+/*
 let test = [[ 'C', 4 ],  [ 'C', 5 ],
 [ 'S', 8 ],  [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
@@ -137,5 +164,6 @@ nk.updateSubmittable();
 nk.select(['C', 9]);
 nk.select(['H', 9]);
 nk.submit();
+*/
 //console.log(nk.trumps);
 //console.log(nk.submits);
