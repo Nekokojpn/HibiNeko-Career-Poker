@@ -87,8 +87,8 @@ class ClientNekoCareerPoker {
             console.log("ちゃんと選べバーカ");
             return null;
         }
-        this.sort(this.f_submits);
-        this.sort(this.f_selects);
+        this.f_submits = this.sort(this.f_submits);
+        this.f_selects = this.sort(this.f_selects);
         let map = new Map([
             ['restrict', this.restrict],
             [5, this.five],
@@ -110,6 +110,21 @@ class ClientNekoCareerPoker {
 
         this.f_selects.length = 0;
         return map;
+    }
+    addTrumps(lists) {
+        lists.forEach(elm => this.trumps.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
+        this.f_trumps = this.sort(this.trumps);
+    }
+    deleteTrumps(lists) {
+        for(let i = 0, l = lists.length; i < l; i++) {
+            let cur = lists[i];
+            for(let j = 0, ll = this.trumps.length; j < ll; j++) {
+                if(cur[1] === this.trumps[j].rank && cur[0] === this.kind.getKindChar(this.trumps[j].kind)) {
+                    this.trumps.splice(j, 1);
+                    ll--;
+                }
+            }
+        }
     }
     //Return type: null | array
     get restrict() {
@@ -161,7 +176,7 @@ class ClientNekoCareerPoker {
             else if(i == 14)
                 break;
         }
-        lists = st;
+        return st;
     }
 };
 module.exports = ClientNekoCareerPoker;
@@ -175,12 +190,15 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ],
 [ 'D', 12 ], [ 'S', 1 ],
 [ 'H', 2 ],  [ 'J', 14 ]];
 let nk = new ClientNekoCareerPoker(test);
+
+nk.addTrumps([['C', 12]]);
+nk.deleteTrumps([['C', 12]]);
 nk.setSubmits([['C', 3], ['H', 3]]);
 nk.updateSubmittable();
 console.log(nk.trumps);
-nk.select(['C', 9]);
-console.log(nk.rawTrumps);
 nk.select(['H', 9]);
+console.log(nk.rawTrumps);
+nk.select(['C', 9]);
 console.log(nk.trumps);
 nk.trumps.forEach(elm => console.log(elm.isSubmittable));
 
