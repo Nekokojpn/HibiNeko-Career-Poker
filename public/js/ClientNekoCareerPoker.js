@@ -9,16 +9,20 @@ class ClientNekoCareerPoker {
         lists.forEach(elm => this.trumps.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
         this.f_submits = new Array();
         this.f_selects = new Array();
+        this.evo = false;
     }
     //lists: Array<[char, Integer]> : Trumps submitted
     setSubmits(lists) {
         this.f_submits.length = 0;
         lists.forEach(elm => this.submits.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
     }
+    setEvolution(flag) {
+        this.evo = flag;
+    }
     updateSubmittable() {
         //No cards submitted
         if(this.submits.length === 0) {
-            this.trumps.forEach((elm) => elm[2] = true);
+            this.trumps.forEach((elm) => elm.setSubmittable(true));
             return;
         }
         for(let i = 0, l = this.submits.length; i < l; i++) {
@@ -54,47 +58,81 @@ class ClientNekoCareerPoker {
     //private:
     genSubmittableList(list) {
         let can = new Array();
-        for(let i = list.rank + 1; ; i++) {
+        if(!this.isEvo) {
+            for(let i = list.rank + 1; ; i++) {
 
-            let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
-            if(t !== void 0) {
-                t.setSubmittable(true);
-                t.setSelect(true);
-                t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
-                while(t !== void 0) {
+                let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
+                if(t !== void 0) {
                     t.setSubmittable(true);
+                    t.setSelect(true);
                     t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                    while(t !== void 0) {
+                        t.setSubmittable(true);
+                        t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                    }
                 }
-            }
-            else {
-                t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
-                while(t !== void 0) {
-                    t.setSubmittable(false);
-                    t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
+                else {
+                    t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
+                    while(t !== void 0) {
+                        t.setSubmittable(false);
+                        t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
+                    }
                 }
+                if(i == 13)
+                    i = 0;
+                else if(i == 2)
+                    i = 13;
+                else if(i == 14)
+                    break;
             }
-            if(i == 13)
-                i = 0;
-            else if(i == 2)
-                i = 13;
-            else if(i == 14)
-                break;
+        }
+        else {
+            for(let i = list.rank - 1; ; i--) {
+                
+                let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
+                if(t !== void 0) {
+                    t.setSubmittable(true);
+                    t.setSelect(true);
+                    t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                    while(t !== void 0) {
+                        t.setSubmittable(true);
+                        t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                    }
+                }
+                else {
+                    t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
+                    while(t !== void 0) {
+                        t.setSubmittable(false);
+                        t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
+                    }
+                }
+                if(i == 1)
+                    i = 14;
+                else if(i == 3)
+                    i = 15;
+                else if(i == 14)
+                    break;
+            }
         }
         return can;
     }
     submit() {
-        if(this.submits.length !== this.selects.length) {
+        if(this.submits.length !== 0 && this.submits.length !== this.selects.length) {
             console.log("ちゃんと選べバーカ");
             return null;
         }
         this.f_submits = this.sort(this.f_submits);
         this.f_selects = this.sort(this.f_selects);
+        //Judge evo
+        if(this.selects.length >= 4)
+            this.setEvolution(true);
         let map = new Map([
             ['restrict', this.restrict],
             [5, this.five],
             [7, this.seven],
             [10, this.ten],
-            [11, this.isJBack]
+            [11, this.isJBack],
+            ['evo', this.isEvo],
         ]);
         this.f_submits.length = 0;
         this.f_selects.forEach(elm => {
@@ -140,6 +178,7 @@ class ClientNekoCareerPoker {
     get seven() { return this.countNumber(7) }
     get ten() { return this.countNumber(10) }
     get isJBack() { return this.selects.some(elm => elm.rank === 11) }
+    get isEvo() { return this.evo }
     countNumber(n) {
         let i = 0;
         this.submits.forEach(elm => {
@@ -181,7 +220,7 @@ class ClientNekoCareerPoker {
 };
 module.exports = ClientNekoCareerPoker;
 
-/*
+
 let test = [[ 'C', 4 ],  [ 'C', 5 ],
 [ 'S', 8 ],  [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
@@ -193,18 +232,17 @@ let nk = new ClientNekoCareerPoker(test);
 
 nk.addTrumps([['C', 12]]);
 nk.deleteTrumps([['C', 12]]);
-nk.setSubmits([['C', 3], ['H', 3]]);
+nk.setSubmits([]);
 nk.updateSubmittable();
 console.log(nk.trumps);
+
 nk.select(['H', 9]);
-console.log(nk.rawTrumps);
 nk.select(['C', 9]);
-console.log(nk.trumps);
-nk.trumps.forEach(elm => console.log(elm.isSubmittable));
+nk.select(['S', 9]);
+nk.select(['D', 9]);
 
 console.log(nk.submit());
-
-console.log(nk.trumps);
+nk.setSubmits([['D', 12]]);
 console.log(nk.submits);
-console.log(nk.rawTrumps);
-*/
+nk.updateSubmittable();
+console.log(nk.trumps);
