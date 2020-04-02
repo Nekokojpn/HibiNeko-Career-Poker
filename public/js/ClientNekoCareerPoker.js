@@ -130,6 +130,7 @@ class ClientNekoCareerPoker {
             ['restrict', this.restrict],
             [5, this.five],
             [7, this.seven],
+            [9, this.isEightCut],
             [10, this.ten],
             [11, this.isJBack],
             ['evo', this.isEvo],
@@ -176,6 +177,7 @@ class ClientNekoCareerPoker {
     }
     get five() { return this.countNumber(5) }
     get seven() { return this.countNumber(7) }
+    get isEightCut() { return this.selects.some(elm => elm.rank === 8) }
     get ten() { return this.countNumber(10) }
     get isJBack() { return this.selects.some(elm => elm.rank === 11) }
     get isEvo() { return this.evo }
@@ -221,11 +223,12 @@ class ClientNekoCareerPoker {
 module.exports = ClientNekoCareerPoker;
 
 
-let test = [[ 'C', 4 ],  [ 'C', 5 ],
-[ 'S', 8 ],  [ 'C', 9 ],
+let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
+[ 'S', 8 ],  ['H', 8], [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
-[ 'D', 10 ], [ 'D', 11 ],
-[ 'S', 12 ], [ 'H', 12 ],
+[ 'D', 10 ], ['H', 10],
+[ 'D', 11 ], [ 'S', 12 ], 
+[ 'H', 12 ],
 [ 'D', 12 ], [ 'S', 1 ],
 [ 'H', 2 ],  [ 'J', 14 ]];
 let nk = new ClientNekoCareerPoker(test);
@@ -236,10 +239,10 @@ nk.setSubmits([]);
 nk.updateSubmittable();
 console.log(nk.trumps);
 
+nk.select(['H', 7]);
+nk.select(['H', 8]);
 nk.select(['H', 9]);
-nk.select(['C', 9]);
-nk.select(['S', 9]);
-nk.select(['D', 9]);
+nk.select(['H', 10]);
 
 console.log(nk.submit());
 nk.setSubmits([['D', 12]]);
