@@ -25,10 +25,13 @@ class ClientNekoCareerPoker {
             this.trumps.forEach((elm) => elm.setSubmittable(true));
             return;
         }
-        for(let i = 0, l = this.submits.length; i < l; i++) {
-            let t = this.genSubmittableList(this.submits[i]);
+        if(!this.isStair) {
+            let t;
+            //if((t = this.trumps.forEach(elm => elm.rank === this.submits[0].rank - 1 &&)))
         }
-
+        for(let i = 0, l = this.submits.length; i < l; i++) {
+            this.switchSubmittable(this.submits[i]);
+        }
     }
     select(list) {
         this.selects.push(new Trump(this.kind.getKind(list[0]), list[1]));
@@ -56,69 +59,75 @@ class ClientNekoCareerPoker {
         return lists;
     }
     //private:
-    genSubmittableList(list) {
-        let can = new Array();
-        if(!this.isEvo) {
-            for(let i = list.rank + 1; ; i++) {
-
-                let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
-                if(t !== void 0) {
+    switchSubmittable(list) {
+        let i = list.rank;
+        while((i = this.getStrongTrump(i)) !== null) {
+            let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
+            if(t !== void 0) {
+                t.setSubmittable(true);
+                t.setSelect(true);
+                while((t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i)) !== void 0)
                     t.setSubmittable(true);
-                    t.setSelect(true);
-                    t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
-                    while(t !== void 0) {
-                        t.setSubmittable(true);
-                        t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
-                    }
+            }
+            else {
+                t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
+                while(t !== void 0) {
+                    t.setSubmittable(false);
+                    t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
                 }
-                else {
-                    t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
-                    while(t !== void 0) {
-                        t.setSubmittable(false);
-                        t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
-                    }
-                }
-                if(i == 13)
-                    i = 0;
-                else if(i == 2)
-                    i = 13;
-                else if(i == 14)
-                    break;
+            }
+        }
+    }
+    getWeakTrump(n) {
+        if(!this.isEvo) {
+            switch (n) {
+                case 1:
+                    return 13;
+                case 3:
+                    return null;
+                default:
+                    return n - 1;
             }
         }
         else {
-            for(let i = list.rank - 1; ; i--) {
-                
-                let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
-                if(t !== void 0) {
-                    t.setSubmittable(true);
-                    t.setSelect(true);
-                    t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
-                    while(t !== void 0) {
-                        t.setSubmittable(true);
-                        t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
-                    }
-                }
-                else {
-                    t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
-                    while(t !== void 0) {
-                        t.setSubmittable(false);
-                        t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
-                    }
-                }
-                if(i == 1)
-                    i = 14;
-                else if(i == 3)
-                    i = 15;
-                else if(i == 14)
-                    break;
+            switch(n) {
+                case 13:
+                    return 1;
+                case 2:
+                    return null;
+                default:
+                    return n + 1;
             }
         }
-        return can;
+    }
+    getStrongTrump(n) {
+        if(!this.isEvo) {
+            switch(n) {
+                case 13:
+                    return 1;
+                case 2:
+                    return 15;
+                case 15:
+                    return null;
+                default:
+                    return n + 1;
+            }
+        }
+        else {
+            switch(n) {
+                case 1:
+                    return 13;
+                case 3:
+                    return 15;
+                case 15:
+                    return null;
+                default:
+                    return n - 1;
+            }
+        }
     }
     submit() {
         if(this.submits.length !== 0 && this.submits.length !== this.selects.length) {
-            console.log("ちゃんと選べバーカ");
             return null;
         }
         this.f_submits = this.sort(this.f_submits);
@@ -146,7 +155,6 @@ class ClientNekoCareerPoker {
                 }
             }
         });
-
         this.f_selects.length = 0;
         return map;
     }
@@ -181,6 +189,7 @@ class ClientNekoCareerPoker {
     get ten() { return this.countNumber(10) }
     get isJBack() { return this.selects.some(elm => elm.rank === 11) }
     get isEvo() { return this.evo }
+    get isStair() { return false } //TODO Implement:
     countNumber(n) {
         let i = 0;
         this.submits.forEach(elm => {
@@ -230,22 +239,10 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 [ 'D', 11 ], [ 'S', 12 ], 
 [ 'H', 12 ],
 [ 'D', 12 ], [ 'S', 1 ],
-[ 'H', 2 ],  [ 'J', 14 ]];
+[ 'H', 2 ],  [ 'J', 15 ]];
 let nk = new ClientNekoCareerPoker(test);
 
-nk.addTrumps([['C', 12]]);
-nk.deleteTrumps([['C', 12]]);
-nk.setSubmits([]);
-nk.updateSubmittable();
-console.log(nk.trumps);
-
-nk.select(['H', 7]);
-nk.select(['H', 8]);
-nk.select(['H', 9]);
-nk.select(['H', 10]);
-
-console.log(nk.submit());
 nk.setSubmits([['D', 12]]);
 console.log(nk.submits);
 nk.updateSubmittable();
-console.log(nk.trumps);
+console.log(nk.rawTrumps);
