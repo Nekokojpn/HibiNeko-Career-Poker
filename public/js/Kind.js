@@ -22,5 +22,21 @@ class Kind {
                 break;
         }
     }
+    getKindChar(_kind) {
+        switch(_kind) {
+            case this.Spade:
+                return 'S';
+            case this.Clover:
+                return 'C';
+            case this.Heart:
+                return 'H';
+            case this.Dia:
+                return 'D';
+            case this.Joker:
+                return 'J';
+            default:
+                break;
+        }
+    }
 }
 module.exports = Kind;
