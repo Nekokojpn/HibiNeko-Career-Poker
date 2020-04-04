@@ -87,7 +87,6 @@ io.on('connection',function(socket){
         console.log(message);
         console.log(roomName);
         io.to(roomName).emit('chat_from_server', message);
-        io.to(roomName).emit('changeViewTurn');
     });
 
     socket.on('disconnect', () => {
