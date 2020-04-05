@@ -1,5 +1,7 @@
 //ファイル読み込み
 let NekoCareerPoker = require('./public/js/NekoCareerPoker.js');
+let ClientNekoCareerPoker = require('./public/js/ClientNekoCareerPoker.js');
+
 let poker = new NekoCareerPoker();
 poker.init();//ソートまでされる
 //console.log(poker.getCardInfo(0));//カード情報
@@ -48,6 +50,8 @@ io.on('connection',function(socket){
     socket.on('joinPlayer', (postName) => {
         let trumps = poker.getCardInfo(playerCount % 4);
         let player = new Player(playerCount,postName, roomID, trumps.length, room);
+        let clientPoker= new ClientNekoCareerPoker(trumps);
+
         players.push(player);
         socket.emit('joinResponse', player);
         io.to(room).emit('joinOpponent', players.filter((val) => {
@@ -55,12 +59,8 @@ io.on('connection',function(socket){
         }));
         socket.emit('roomResponse', room);
         socket.emit('gameInfo', player);
-        socket.emit('getTrump', trumps);
+        socket.emit('getTrump', trumps, clientPoker);
         playerCount++;
-    });
-
-    socket.on('requestTrump', () => {
-        socket.emit('getTrump', poker.getCardInfo(3));
     });
 
     socket.on('changeTurn', (player_id, roomName) => {

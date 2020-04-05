@@ -1,9 +1,6 @@
 # ベースイメージを指定
 FROM node
 
-# 雛形を生成するのに必要なパッケージのインストール
-RUN npm install -g express-generator
-
 # ディレクトリを移動する
 WORKDIR /app
 

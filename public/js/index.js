@@ -1,3 +1,8 @@
+//ファイル読み込み
+//let ClientNekoCareerPoker = require('./ClientNekoCareerPoker.js');
+//import { ClientNekoCareerPoker } from './ClientNekoCareerPoker.js';
+//let nk = new ClientNekoCareerPoker(test);
+
 // グローバルに展開
 phina.globalize();
 //アセット
@@ -203,8 +208,10 @@ phina.define("MainScene", {
       //console.log(players);
     });
 
-    socket.on('getTrump', (_trumps) => {
+    socket.on('getTrump', (_trumps,test) => {
+      console.log(test);
       trumps = _trumps;
+      console.log(trumps)
       this.createPlayerTrumps(this);
     });
 
@@ -344,13 +351,6 @@ phina.define("MainScene", {
     }
   }
 });
-//+ '(' + player.remainTrump + ')'
-/*
-this.sprite = Sprite('H9').addChildTo(this);
-    this.sprite.x = this.gridX.center();
-    this.sprite.y = this.gridY.center();
-    this.sprite.setScale(0.1);
-*/
 
 phina.main(function() {
   // アプリケーションを生成

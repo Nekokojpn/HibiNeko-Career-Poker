@@ -1,6 +1,7 @@
 const li = ['S', 'C', 'H', 'D', 'J'];
-let Trump = require("./Trump.js");
-let Kind = require("./Kind.js");
+let Trump = require('./Trump.js');
+let Kind = require('./Kind.js');
+
 class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
