@@ -1,8 +1,10 @@
 const li = ['S', 'C', 'H', 'D', 'J'];
-let Trump = require('./Trump.js');
-let Kind = require('./Kind.js');
+//let Trump = require('./Trump.js');
+//let Kind = require('./Kind.js');
+import Trump from './Trump.js';
+import Kind from './Kind.js';
 
-class ClientNekoCareerPoker {
+export default class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
         this.kind = new Kind();
@@ -10,29 +12,22 @@ class ClientNekoCareerPoker {
         lists.forEach(elm => this.trumps.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
         this.f_submits = new Array();
         this.f_selects = new Array();
-        this.evo = false;
     }
     //lists: Array<[char, Integer]> : Trumps submitted
     setSubmits(lists) {
         this.f_submits.length = 0;
         lists.forEach(elm => this.submits.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
     }
-    setEvolution(flag) {
-        this.evo = flag;
-    }
     updateSubmittable() {
         //No cards submitted
         if(this.submits.length === 0) {
-            this.trumps.forEach((elm) => elm.setSubmittable(true));
+            this.trumps.forEach((elm) => elm[2] = true);
             return;
         }
-        if(!this.isStair) {
-            let t;
-            //if((t = this.trumps.forEach(elm => elm.rank === this.submits[0].rank - 1 &&)))
-        }
         for(let i = 0, l = this.submits.length; i < l; i++) {
-            this.switchSubmittable(this.submits[i]);
+            let t = this.genSubmittableList(this.submits[i]);
         }
+
     }
     select(list) {
         this.selects.push(new Trump(this.kind.getKind(list[0]), list[1]));
@@ -60,15 +55,19 @@ class ClientNekoCareerPoker {
         return lists;
     }
     //private:
-    switchSubmittable(list) {
-        let i = list.rank;
-        while((i = this.getStrongTrump(i)) !== null) {
+    genSubmittableList(list) {
+        let can = new Array();
+        for(let i = list.rank + 1; ; i++) {
+
             let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
             if(t !== void 0) {
                 t.setSubmittable(true);
                 t.setSelect(true);
-                while((t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i)) !== void 0)
+                t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                while(t !== void 0) {
                     t.setSubmittable(true);
+                    t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i);
+                }
             }
             else {
                 t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
@@ -77,73 +76,28 @@ class ClientNekoCareerPoker {
                     t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
                 }
             }
+            if(i == 13)
+                i = 0;
+            else if(i == 2)
+                i = 13;
+            else if(i == 14)
+                break;
         }
-    }
-    getWeakTrump(n) {
-        if(!this.isEvo) {
-            switch (n) {
-                case 1:
-                    return 13;
-                case 3:
-                    return null;
-                default:
-                    return n - 1;
-            }
-        }
-        else {
-            switch(n) {
-                case 13:
-                    return 1;
-                case 2:
-                    return null;
-                default:
-                    return n + 1;
-            }
-        }
-    }
-    getStrongTrump(n) {
-        if(!this.isEvo) {
-            switch(n) {
-                case 13:
-                    return 1;
-                case 2:
-                    return 15;
-                case 15:
-                    return null;
-                default:
-                    return n + 1;
-            }
-        }
-        else {
-            switch(n) {
-                case 1:
-                    return 13;
-                case 3:
-                    return 15;
-                case 15:
-                    return null;
-                default:
-                    return n - 1;
-            }
-        }
+        return can;
     }
     submit() {
-        if(this.submits.length !== 0 && this.submits.length !== this.selects.length) {
+        if(this.submits.length !== this.selects.length) {
+            console.log("ちゃんと選べバーカ");
             return null;
         }
         this.f_submits = this.sort(this.f_submits);
         this.f_selects = this.sort(this.f_selects);
-        //Judge evo
-        if(this.selects.length >= 4)
-            this.setEvolution(true);
         let map = new Map([
             ['restrict', this.restrict],
             [5, this.five],
             [7, this.seven],
-            [9, this.isEightCut],
             [10, this.ten],
-            [11, this.isJBack],
-            ['evo', this.isEvo],
+            [11, this.isJBack]
         ]);
         this.f_submits.length = 0;
         this.f_selects.forEach(elm => {
@@ -156,6 +110,7 @@ class ClientNekoCareerPoker {
                 }
             }
         });
+
         this.f_selects.length = 0;
         return map;
     }
@@ -186,11 +141,8 @@ class ClientNekoCareerPoker {
     }
     get five() { return this.countNumber(5) }
     get seven() { return this.countNumber(7) }
-    get isEightCut() { return this.selects.some(elm => elm.rank === 8) }
     get ten() { return this.countNumber(10) }
     get isJBack() { return this.selects.some(elm => elm.rank === 11) }
-    get isEvo() { return this.evo }
-    get isStair() { return false } //TODO Implement:
     countNumber(n) {
         let i = 0;
         this.submits.forEach(elm => {
@@ -230,20 +182,32 @@ class ClientNekoCareerPoker {
         return st;
     }
 };
-module.exports = ClientNekoCareerPoker;
+//module.exports = ClientNekoCareerPoker;
 
-
-let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
-[ 'S', 8 ],  ['H', 8], [ 'C', 9 ],
+/*
+let test = [[ 'C', 4 ],  [ 'C', 5 ],
+[ 'S', 8 ],  [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
-[ 'D', 10 ], ['H', 10],
-[ 'D', 11 ], [ 'S', 12 ], 
-[ 'H', 12 ],
+[ 'D', 10 ], [ 'D', 11 ],
+[ 'S', 12 ], [ 'H', 12 ],
 [ 'D', 12 ], [ 'S', 1 ],
-[ 'H', 2 ],  [ 'J', 15 ]];
+[ 'H', 2 ],  [ 'J', 14 ]];
 let nk = new ClientNekoCareerPoker(test);
 
-nk.setSubmits([['D', 12]]);
-console.log(nk.submits);
+nk.addTrumps([['C', 12]]);
+nk.deleteTrumps([['C', 12]]);
+nk.setSubmits([['C', 3], ['H', 3]]);
 nk.updateSubmittable();
+console.log(nk.trumps);
+nk.select(['H', 9]);
 console.log(nk.rawTrumps);
+nk.select(['C', 9]);
+console.log(nk.trumps);
+nk.trumps.forEach(elm => console.log(elm.isSubmittable));
+
+console.log(nk.submit());
+
+console.log(nk.trumps);
+console.log(nk.submits);
+console.log(nk.rawTrumps);
+*/

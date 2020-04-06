@@ -1,6 +1,5 @@
 //ファイル読み込み
 let NekoCareerPoker = require('./public/js/NekoCareerPoker.js');
-let ClientNekoCareerPoker = require('./public/js/ClientNekoCareerPoker.js');
 
 let poker = new NekoCareerPoker();
 poker.init();//ソートまでされる
