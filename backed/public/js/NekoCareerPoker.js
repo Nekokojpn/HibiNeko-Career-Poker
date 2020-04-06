@@ -10,7 +10,7 @@ class NekoCareerPoker {
                 cnt++;
             this.cardinfo[i] = [li[cnt], i % 13 + 1];
         }
-        this.cardinfo[52] = ['J', 14];
+        this.cardinfo[52] = ['J', 15];
         this.submits = new Array();
     }
     //init method works with shuffle and divide method.
@@ -61,8 +61,8 @@ class NekoCareerPoker {
             if(i == 13)
                 i = 0;
             else if(i == 2)
-                i = 13;
-            else if(i == 14)
+                i = 14;
+            else if(i == 15)
                 break;
         }
         //console.log(st);
