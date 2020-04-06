@@ -5,7 +5,7 @@ services:
     image: node-express-dev:1.0
     tty: true
     volumes:
-      - ./:/app
+      - ./backed:/app
     ports:
       - "4000:3000"
   fronted:

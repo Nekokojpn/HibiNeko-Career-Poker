@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="description" content="${description}" />
+
+    <link type="text/css" rel="stylesheet" href="/static/css/index.css">
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/gh/phinajs/phina.js@v0.2.3/build/phina.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script  src="/static/js/index.js"></script>
+    
+    <div id="app">
+      <div class="container">
+        <header>
+          <h1 class="headline">
+            <a>HibiNeko-Career-Poker</a>
+          </h1>
+        </header>
+          <canvas id = "mycanvas"></canvas>
+          <div class="text-area">
+          <div class="chat-area" ref="chatScroll">
+            <div v-for="chatMessage in messages" v-bind:key="chatMessage.id">{{ chatMessage }}</div>
+          </div>
+          <div class="chat-container">
+            <input type="text" class="chat-input" v-model='message' v-on:keydown.enter='postChat' />
+            <button class="chat-button" v-on:click='postChat'>post</button>
+          </div>
+          <div class="info-area">
+            <div>ID:{{ player.ID }}</div>
+            <div>name:{{ player.name }}</div>
+            <div>枚数:{{ player.cardRemain }}</div>
+            <div>Turn:{{ player.turnFlag }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  let app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Welcome to HibiNeko-Career-Poker!',
+    messages: [],
+    player: ''
+  },
+  created() {
+    socket.on('chat_from_server', (txt) => {
+        console.log(txt);
+        this.messages.push(txt);
+      });
+    socket.on('gameInfo', (_player) => {
+      console.log(_player);
+      this.player = _player;
+    });
+    socket.on('changeViewTurn', (_player) => {
+      this.player = _player;
+    });
+  },
+  updated() {
+    this.scrollToEnd()
+  },
+  methods: {
+    postChat: function() {
+      socket.emit('chat_from_front', this.message, player.roomName);
+    },
+    scrollToEnd() {
+          this.$nextTick(() => {
+              const chatLog = this.$refs.chatScroll
+              if (!chatLog) return
+              chatLog.scrollTop = chatLog.scrollHeight
+           });
+        }
+    }
+});
+</script>
