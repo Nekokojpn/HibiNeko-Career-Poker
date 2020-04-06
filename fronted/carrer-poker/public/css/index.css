@@ -1,0 +1,116 @@
+html {
+    height: 100%;
+    
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    background-color: #fff;
+}
+
+header {
+  height: 1%;
+  width: 100%;
+  padding: 15px 0;
+  background-color: #337079;
+  color: white;
+}
+header .headline{
+    line-height: 0px;
+    float: left;
+    font-size: 20px;
+    margin-left: 10px;
+}
+.nav-list {
+    line-height: 5px;
+    float: left;
+    margin-left: 30px;
+    list-style: none;
+}
+.nav-list-item {
+  list-style: none;
+  display: inline-block;
+  margin: 0 20px;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#mycanvas {
+  margin: 0 auto;
+  width: 60%;
+  height: 70%;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5%;
+}
+
+.text-area {
+  display: inline-block;
+  width: 25%;
+  height: 90vh;
+  border: solid #ff00ff;
+  background-color: #fff;
+}
+
+.chat-area {
+  width: auto;
+  height: 44.5vh;
+  border: solid green;
+  position: relative;
+  overflow:scroll;
+  overflow-x: hidden;
+}
+
+.chat-container {
+  width: 100%;
+}
+
+.chat-input {
+  width: 70%;
+}
+.chat-button {
+  width: 20%;
+}
+
+.info-area {
+  width: auto;
+  height: 42.0vh;
+  border: solid blue;
+}
+
+.gameArea {
+  display: inline-block;
+  width: 74%;
+}
+.opponent-label-1 {
+  position: relative;
+  top: 10%;
+  left: 10%;
+  width: 30%;
+  height: 30%;
+  background-color: black;
+  border: solid blue;
+}
+
+.opponent-label-2 {
+  position: relative;
+  top: 17%;
+  left: 10%;
+  width: 30%;
+  background-color: black;
+  border: solid blue;
+}
+
+.opponent-label-3 {
+  position: relative;
+  top: 17%;
+  left: 10%;
+  width: 30%;
+  background-color: black;
+  border: solid blue;
+}

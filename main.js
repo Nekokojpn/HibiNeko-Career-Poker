@@ -15,7 +15,7 @@ var app = express();
 app.use('/static', express.static(__dirname + '/public'));
 var http = require('http').Server(app);
 const io = require('socket.io')(http);
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 //ルート
 app.get('/' , function(req, res){
@@ -33,6 +33,7 @@ let playerCount = 0;
 let roomID = 0;
 //socket
 io.on('connection',function(socket){
+    console.log('join!');
     //ルーム処理
     if(playerCount % 4 === 0 && playerCount !== 0) {
         roomID++;
@@ -50,7 +51,6 @@ io.on('connection',function(socket){
     socket.on('joinPlayer', (postName) => {
         let trumps = poker.getCardInfo(playerCount % 4);
         let player = new Player(playerCount,postName, roomID, trumps.length, room);
-        let clientPoker= new ClientNekoCareerPoker(trumps);
 
         players.push(player);
         socket.emit('joinResponse', player);
@@ -59,7 +59,7 @@ io.on('connection',function(socket){
         }));
         socket.emit('roomResponse', room);
         socket.emit('gameInfo', player);
-        socket.emit('getTrump', trumps, clientPoker);
+        socket.emit('getTrump', trumps);
         playerCount++;
     });
 
@@ -72,13 +72,17 @@ io.on('connection',function(socket){
     });
 
     socket.on('postTrumps', (player_id, postTrumps) => {
+        let stageTrumps = new Array();
+        for(let i = 0; i < postTrumps.length; i++) {
+            stageTrumps.push(postTrumps[i][0]);
+        }
         let player = players.find((val) => val.ID === player_id);
-        player.cardRemain -= postTrumps.length;
+        player.cardRemain -= stageTrumps.length;
         for(let i = 0; i < players.length; i++) {
             if(players[i].ID === player.ID) players[i] = player;
         }
         let opponents = players.filter((val) => val.roomName === player.roomName);
-        io.to(player.roomName).emit('stageTrumps', postTrumps);
+        io.to(player.roomName).emit('stageTrumps', stageTrumps);
         io.to(player.roomName).emit('changeOpponentLabel', opponents);
         socket.emit('changeViewTurn', player);
     });
