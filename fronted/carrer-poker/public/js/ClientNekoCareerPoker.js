@@ -225,7 +225,7 @@ export default class ClientNekoCareerPoker {
     }
 };
 
-
+/*
 let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 [ 'S', 8 ],  ['H', 8], [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
@@ -240,3 +240,4 @@ nk.setSubmits([['D', 12]]);
 console.log(nk.submits);
 nk.updateSubmittable();
 console.log(nk.rawTrumps);
+*/
