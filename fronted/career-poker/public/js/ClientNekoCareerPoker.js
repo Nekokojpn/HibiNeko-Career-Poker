@@ -46,13 +46,21 @@ export default class ClientNekoCareerPoker {
                 elm.setSubmittable(false);
         });
     }
-    unselect(list) {
+    unSelect(list) {
         let i, l;
         for(i = 0, l = this.selects.length; i < l; i++) {
             if(this.selects[i].rank === list[1] && this.selects[i].kind === this.kind.getKind(list[0]))
                 break;
         }
         this.selects.splice(i, 1);
+        this.trumps.forEach(elm => {
+            if(elm.rank === list[1])
+                elm.setSubmittable(true);
+            else if(elm.rank !== list[1])
+                elm.setSubmittable(false);
+            if(this.submits.length === this.selects.length)
+                elm.setSubmittable(false);
+        });
     }
     //get player's trumps
     get trumps() { return this.f_trumps; }
