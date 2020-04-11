@@ -19,9 +19,7 @@ export default class ClientNekoCareerPoker {
         this.f_submits.length = 0;
         lists.forEach(elm => this.submits.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
     }
-    setEvolution(flag) {
-        this.evo = flag;
-    }
+    setEvolution(flag) { this.evo = flag; }
     updateSubmittable() {
         //No cards submitted
         if(this.submits.length === 0) {
@@ -47,16 +45,10 @@ export default class ClientNekoCareerPoker {
         });
     }
     //get player's trumps
-    get trumps() {
-        return this.f_trumps;
-    }
-    get submits() {
-        return this.f_submits;
-    }
-    get selects() {
-        return this.f_selects;
-    }
-    get rawTrumps() {
+    get trumps() { return this.f_trumps; }
+    get submits() { return this.f_submits; }
+    get selects() { return this.f_selects; }
+    get rawTrumps() { 
         let lists = new Array();
         this.trumps.forEach(elm => lists.push([this.kind.getKindChar(elm.kind), elm.rank, elm.isSubmittable]));
         return lists;
@@ -232,9 +224,8 @@ export default class ClientNekoCareerPoker {
         return st;
     }
 };
-//module.exports = ClientNekoCareerPoker;
 
-
+/*
 let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 [ 'S', 8 ],  ['H', 8], [ 'C', 9 ],
 [ 'H', 9 ],  [ 'D', 9 ],
@@ -249,3 +240,4 @@ nk.setSubmits([['D', 12]]);
 console.log(nk.submits);
 nk.updateSubmittable();
 console.log(nk.rawTrumps);
+*/
