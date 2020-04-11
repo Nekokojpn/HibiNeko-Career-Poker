@@ -3,7 +3,7 @@ export default class Trump {
         this.f_kind = _kind;
         this.f_rank = _rank;
         this.f_select = false;
-        this.f_submittable = true;
+        this.f_submittable = false;
     }
     get kind() {
         return this.f_kind;
