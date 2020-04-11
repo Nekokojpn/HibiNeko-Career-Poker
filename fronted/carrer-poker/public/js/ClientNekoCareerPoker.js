@@ -58,15 +58,16 @@ export default class ClientNekoCareerPoker {
         let i = list.rank;
         while((i = this.getStrongTrump(i)) !== null) {
             let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
-            if(t !== void 0) {
+            if(t !== void 0 && t !== null) {
+                console.log(t);
                 t.setSubmittable(true);
                 t.setSelect(true);
-                while((t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i)) !== void 0)
+                while((t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i)) !== void 0 && t !== null)
                     t.setSubmittable(true);
             }
             else {
                 t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
-                while(t !== void 0) {
+                while(t !== void 0 && t !== null) {
                     t.setSubmittable(false);
                     t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
                 }

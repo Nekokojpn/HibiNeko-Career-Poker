@@ -46,7 +46,7 @@
 
 <script type='module'>
   import ClientNekoCareerPoker from './js/ClientNekoCareerPoker.js';
-  let socket = io('192.168.33.77:4000');
+  let socket = io('localhost:4000');
   let app = new Vue({
   el: '#game',
   data: {
@@ -150,6 +150,59 @@ var ASSETS = {
     "H12":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust51.png",
     "H13":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust52.png",
     "J14":"https://chicodeza.com/wordpress/wp-content/uploads/torannpu-illust53.png",
+    //薄黒いversion
+    "S1-black":"/asset/image/S1-black.jpg",
+    "S2-black":"/asset/image/S2-black.jpg",
+    "S3-black":"/asset/image/S3-black.jpg",
+    "S4-black":"/asset/image/S4-black.jpg",
+    "S5-black":"/asset/image/S5-black.jpg",
+    "S6-black":"/asset/image/S6-black.jpg",
+    "S7-black":"/asset/image/S7-black.jpg",
+    "S8-black":"/asset/image/S8-black.jpg",
+    "S9-black":"/asset/image/S9-black.jpg",
+    "S10-black":"/asset/image/S10-black.jpg",
+    "S11-black":"/asset/image/S11-black.jpg",
+    "S12-black":"/asset/image/S12-black.jpg",
+    "S13-black":"/asset/image/S13-black.jpg",
+    "D1-black":"/asset/image/D1-black.jpg",
+    "D2-black":"/asset/image/D2-black.jpg",
+    "D3-black":"/asset/image/D3-black.jpg",
+    "D4-black":"/asset/image/D4-black.jpg",
+    "D5-black":"/asset/image/D5-black.jpg",
+    "D6-black":"/asset/image/D6-black.jpg",
+    "D7-black":"/asset/image/D7-black.jpg",
+    "D8-black":"/asset/image/D8-black.jpg",
+    "D9-black":"/asset/image/D9-black.jpg",
+    "D10-black":"/asset/image/D10-black.jpg",
+    "D11-black":"/asset/image/D11-black.jpg",
+    "D12-black":"/asset/image/D12-black.jpg",
+    "D13-black":"/asset/image/D13-black.jpg",
+    "C1-black":"/asset/image/C1-black.jpg",
+    "C2-black":"/asset/image/C2-black.jpg",
+    "C3-black":"/asset/image/C3-black.jpg",
+    "C4-black":"/asset/image/C4-black.jpg",
+    "C5-black":"/asset/image/C5-black.jpg",
+    "C6-black":"/asset/image/C6-black.jpg",
+    "C7-black":"/asset/image/C7-black.jpg",
+    "C8-black":"/asset/image/C8-black.jpg",
+    "C9-black":"/asset/image/C9-black.jpg",
+    "C10-black":"/asset/image/C10-black.jpg",
+    "C11-black":"/asset/image/C11-black.jpg",
+    "C12-black":"/asset/image/C12-black.jpg",
+    "C13-black":"/asset/image/C13-black.jpg",
+    "H1-black":"/asset/image/H1-black.jpg",
+    "H2-black":"/asset/image/H2-black.jpg",
+    "H3-black":"/asset/image/H3-black.jpg",
+    "H4-black":"/asset/image/H4-black.jpg",
+    "H5-black":"/asset/image/H5-black.jpg",
+    "H6-black":"/asset/image/H6-black.jpg",
+    "H7-black":"/asset/image/H7-black.jpg",
+    "H8-black":"/asset/image/H8-black.jpg",
+    "H9-black":"/asset/image/H9-black.jpg",
+    "H10-black":"/asset/image/H10-black.jpg",
+    "H11-black":"/asset/image/H11-black.jpg",
+    "H12-black":"/asset/image/H12-black.jpg",
+    "H13-black":"/asset/image/H13-black.jpg",
   },
 };
 //グローバル
@@ -297,6 +350,9 @@ phina.define("MainScene", {
 
     socket.on('getTrump', (_trumps) => {
       this.clientPoker = new ClientNekoCareerPoker(_trumps);
+      this.clientPoker.setSubmits([['D', 12]]);
+      console.log(this.clientPoker.submits);
+      this.clientPoker.updateSubmittable();
       trumps = this.clientPoker.rawTrumps;
       this.createPlayerTrumps(this);
     });
@@ -349,6 +405,9 @@ phina.define("MainScene", {
       let trumpFlag = trumps[i][2];
       let trump = trumpMark + trumpNum;
       
+      //テスト
+
+      //出せるトランプと出せないトランプの仕分け
       let trumpSprite = Sprite(trump).addChildTo(self);
       trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
       trumpSprite.y = self.gridY.center(3.0);
@@ -358,33 +417,48 @@ phina.define("MainScene", {
 
       trumpSprites.push(trumpSprite);
       trumpSprite.setInteractive(true);
-      trumpSprite.onpointstart = function() {
-        if(!trumpSprite.clickFlag) {
-          let postTrump = new Array();
-          trumpSprite.y = self.gridY.center(2.5);
-          trumpSprite.clickFlag = true
-          postTrump.push(trump, trumpFlag);
-          postTrumps.push(postTrump);
-        }else {
-          let deleteTrump = new Array();
-          deleteTrump.push(trump, trumpFlag);
-          trumpSprite.y = self.gridY.center(3.0);
-          trumpSprite.clickFlag = false
-          postTrumps = postTrumps.filter((val) => {
-            console.log(val);
-            console.log(deleteTrump);
-            return JSON.stringify(val) != JSON.stringify(deleteTrump);
-          });
-        }
-        console.log(postTrumps);
-      };
-      trumpSprite.on('pointover', () => {
-        trumpSprite.alpha = 0.8;
-      });
-      trumpSprite.on('pointout', () => {
-        trumpSprite.alpha = 1.0;
-      });
+      
+      if(trumpFlag === true) {
+        trumpSprite.onpointstart = function() {
+          if(!trumpSprite.clickFlag) {
+            let postTrump = new Array();
+            trumpSprite.y = self.gridY.center(2.5);
+            trumpSprite.clickFlag = true
+            postTrump.push(trump, trumpFlag);
+            postTrumps.push(postTrump);
+          }else {
+            let deleteTrump = new Array();
+            deleteTrump.push(trump, trumpFlag);
+            trumpSprite.y = self.gridY.center(3.0);
+            trumpSprite.clickFlag = false
+            postTrumps = postTrumps.filter((val) => {
+              console.log(val);
+              console.log(deleteTrump);
+              return JSON.stringify(val) != JSON.stringify(deleteTrump);
+            });
+          }
+          console.log(postTrumps);
+        };
+        trumpSprite.on('pointover', () => {
+          trumpSprite.alpha = 0.8;
+        });
+        trumpSprite.on('pointout', () => {
+          trumpSprite.alpha = 1.0;
+        });
       //console.log(trump); 
+      } else {
+        let blackTrump = trump + '-black';
+        console.log(blackTrump);
+        let trumpSprite = Sprite(blackTrump).addChildTo(self);
+        trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
+        trumpSprite.y = self.gridY.center(3.0);
+        trumpSprite.setScale(0.2);
+        trumpSprite.name = trump;
+        trumpSprite.clickFlag = false;
+
+        trumpSprites.push(trumpSprite);
+        trumpSprite.setInteractive(true);
+      }
     }
     console.log(postTrumps);
   },
