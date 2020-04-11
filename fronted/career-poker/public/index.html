@@ -349,11 +349,7 @@ phina.define("MainScene", {
     });
 
     socket.on('getTrump', (_trumps) => {
-      this.clientPoker = new ClientNekoCareerPoker(_trumps);
-      this.clientPoker.setSubmits([['D', 12]]);
-      console.log(this.clientPoker.submits);
-      this.clientPoker.updateSubmittable();
-      trumps = this.clientPoker.rawTrumps;
+      this.createClientPoker(this, _trumps);
       this.createPlayerTrumps(this);
     });
 
@@ -405,8 +401,6 @@ phina.define("MainScene", {
       let trumpFlag = trumps[i][2];
       let trump = trumpMark + trumpNum;
       
-      //テスト
-
       //出せるトランプと出せないトランプの仕分け
       let trumpSprite = Sprite(trump).addChildTo(self);
       trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
@@ -426,6 +420,7 @@ phina.define("MainScene", {
             trumpSprite.clickFlag = true
             postTrump.push(trump, trumpFlag);
             postTrumps.push(postTrump);
+            self.updateSelectTrump(self,[trumpMark, trumpNum]);
           }else {
             let deleteTrump = new Array();
             deleteTrump.push(trump, trumpFlag);
@@ -518,6 +513,22 @@ phina.define("MainScene", {
     for(let i = 0; i < self.opponentLabels.length; i++) {
       self.opponentLabels[i].remove();
     }
+  },
+  createClientPoker: (self, _trumps) => {
+    self.clientPoker = new ClientNekoCareerPoker(_trumps);
+    self.clientPoker.setSubmits([]);
+    self.clientPoker.updateSubmittable();
+    trumps = self.clientPoker.rawTrumps;
+  },
+  updateClientPoker: (self) => {
+    trumps = self.clientPoker.rawTrumps;
+    console.log(trumps);
+  },
+  updateSelectTrump: (self,selectTrump) => {
+    console.log(selectTrump);
+    self.clientPoker.select(selectTrump);
+    self.clientPoker.updateSubmittable();
+    self.updateClientPoker(self);
   }
 });
 
