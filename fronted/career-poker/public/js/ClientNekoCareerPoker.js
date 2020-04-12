@@ -21,7 +21,7 @@ export default class ClientNekoCareerPoker {
         lists.forEach(elm => this.submits.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
         this.updateSubmittable();
     }
-    setEvolution(flag) { this.evo = flag; }
+    setEvolution(flag) { this.evo = flag }
     updateSubmittable() {
         //No cards submitted
         if(this.submits.length === 0) {
@@ -32,6 +32,7 @@ export default class ClientNekoCareerPoker {
             let t;
             //if((t = this.trumps.forEach(elm => elm.rank === this.submits[0].rank - 1 &&)))
         }
+        this.trumps.forEach((elm) => elm.setSubmittable(false));
         for(let i = 0, l = this.submits.length; i < l; i++) {
             this.switchSubmittable(this.submits[i]);
         }
@@ -152,7 +153,8 @@ export default class ClientNekoCareerPoker {
             ['restrict', this.restrict],
             [5, this.five],
             [7, this.seven],
-            [9, this.isEightCut],
+            [8, this.isEightCut],
+            [9, this.isNineReverse],
             [10, this.ten],
             [11, this.isJBack],
             ['evo', this.isEvo],
@@ -209,6 +211,7 @@ export default class ClientNekoCareerPoker {
     get five() { return this.countNumber(5) }
     get seven() { return this.countNumber(7) }
     get isEightCut() { return this.selects.some(elm => elm.rank === 8) }
+    get isNineReverse() { return this.selects.some(elm => elm.rank === 9) }
     get ten() { return this.countNumber(10) }
     get isJBack() { return this.selects.some(elm => elm.rank === 11) }
     get isEvo() { return this.evo }
@@ -266,18 +269,9 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 let nk = new ClientNekoCareerPoker(test);
 nk.setSubmits([]);
 console.log(nk.rawTrumps);
-nk.select(['S', 9]);
-console.log(nk.selects);
-console.log(nk.rawTrumps);
-nk.select(['C', 9]);
-console.log(nk.selects);
-console.log(nk.rawTrumps);
-nk.unSelect(['C', 9]);
-console.log(nk.selects);
-console.log(nk.rawTrumps);
-nk.unSelect(['S', 9]);
-console.log(nk.selects);
+nk.setSubmits([['S', 9]]);
 console.log(nk.rawTrumps);
 */
+
 
 //updatesubmittable is private func
