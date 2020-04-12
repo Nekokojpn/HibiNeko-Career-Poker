@@ -43,8 +43,8 @@ export default class ClientNekoCareerPoker {
                 elm.setSubmittable(true);
             else if(elm.rank !== list[1])
                 elm.setSubmittable(false);
-            if(this.submits.length === this.selects.length)
-                elm.setSubmittable(false);
+            //if(this.submits.length === this.selects.length)
+              //  elm.setSubmittable(false);
         });
     }
     select(list) {
