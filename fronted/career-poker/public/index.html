@@ -263,6 +263,8 @@ phina.define("MainScene", {
     this.post.setPosition(this.gridX.center(5), this.gridY.center(6.8));
     this.post.setInteractive(false);
     this.post.onpointstart = () => {
+          let test = this.clientPoker.submit();
+          console.log(test);
           socket.emit('postTrumps', player.ID, postTrumps);
           socket.emit('changeTurn', player.ID, roomName);
           this.clearPlayerTrumps();
@@ -372,8 +374,9 @@ phina.define("MainScene", {
     });
 
     socket.on('stageTrumps', (_stageTrumps) => {
-      this.clearStageTrumps(this);
       stageTrumps = _stageTrumps;
+      this.pokerSetTtump(this, stageTrumps);
+      this.clearStageTrumps(this);
       this.createStageTrumps(this);
     });
 
@@ -421,7 +424,8 @@ phina.define("MainScene", {
             postTrumps = postTrumps.filter((val) => {
               return JSON.stringify(val) != JSON.stringify(deleteTrump);
             });
-            self.clientPoker.unSelect(trump);
+            console.log([trumpMark, trumpNum]);
+            self.clientPoker.unSelect([trumpMark, trumpNum]);
             self.updateClientPoker(self);
           }
         };
@@ -441,8 +445,8 @@ phina.define("MainScene", {
       } else {
         trumpSprite.y = self.gridY.center(2.5);
       }
-      trumpSprite.x = self.gridX.span(i * 1.05 + 1.05);
-      trumpSprite.setScale(0.2);
+      trumpSprite.x = self.gridX.span(i * 1.02 + 0.75);
+      trumpSprite.setScale(0.13);
       trumpSprite.name = trump;
       trumpSprites.push(trumpSprite);
     }
@@ -511,7 +515,7 @@ phina.define("MainScene", {
   createClientPoker: (self, _trumps) => {
     self.clientPoker = new ClientNekoCareerPoker(_trumps);
     self.clientPoker.setSubmits([]);
-    self.clientPoker.updateSubmittable();
+    self.clientPoker.setSubmits([['S', 9]]);
     trumps = self.clientPoker.rawTrumps;
   },
   updateClientPoker: (self) => {
@@ -522,6 +526,19 @@ phina.define("MainScene", {
   updateSelectTrump: (self,selectTrump) => {
     self.clientPoker.select(selectTrump);
     self.updateClientPoker(self);
+  },
+  pokerSetTtump: (self, _stageTrumps) => {
+    let submitTrumps = new Array();
+    for(let i = 0; i < _stageTrumps.length; i++) {
+      let stageTrump = _stageTrumps[i];
+      let trumpMark = stageTrump.substr(0, 1);
+      let trumpNum = Number(stageTrump.substr(1));
+      submitTrumps.push([trumpMark, trumpNum]);
+    }
+    self.clientPoker.setSubmits(submitTrumps);
+    trumps = self.clientPoker.rawTrumps;
+    console.log(trumps);
+    console.log(submitTrumps);
   }
 });
 
@@ -589,7 +606,7 @@ header .headline{
 
 #mycanvas {
   margin: 0 auto;
-  width: 60%;
+  width: 70%;
   height: 70%;
   display: inline-block;
   margin-left: auto;
