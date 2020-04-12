@@ -378,6 +378,7 @@ phina.define("MainScene", {
       this.pokerSetTtump(this, stageTrumps);
       this.clearStageTrumps(this);
       this.createStageTrumps(this);
+      this.updateClientPoker(this);
     });
 
     socket.on('changeOpponentLabel', (_opponents) => {
@@ -515,7 +516,7 @@ phina.define("MainScene", {
   createClientPoker: (self, _trumps) => {
     self.clientPoker = new ClientNekoCareerPoker(_trumps);
     self.clientPoker.setSubmits([]);
-    self.clientPoker.setSubmits([['S', 9]]);
+    //self.clientPoker.setSubmits([['S', 9]]);
     trumps = self.clientPoker.rawTrumps;
   },
   updateClientPoker: (self) => {
@@ -535,6 +536,7 @@ phina.define("MainScene", {
       let trumpNum = Number(stageTrump.substr(1));
       submitTrumps.push([trumpMark, trumpNum]);
     }
+    console.log(trumps);
     self.clientPoker.setSubmits(submitTrumps);
     trumps = self.clientPoker.rawTrumps;
     console.log(trumps);
