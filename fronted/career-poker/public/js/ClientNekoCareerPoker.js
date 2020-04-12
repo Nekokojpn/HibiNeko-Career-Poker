@@ -71,6 +71,7 @@ class ClientNekoCareerPoker {
         if(this.selects.length === 0) {
             this.updateSubmittable();
         }
+
         else
             this.updateFromSelect(list);
     }
