@@ -5,7 +5,7 @@ import Trump from './Trump.js';
 import Kind from './Kind.js';
 
 export default class ClientNekoCareerPoker {
-//class ClientNekoCareerPoker {
+class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
         this.kind = new Kind();
@@ -32,7 +32,10 @@ export default class ClientNekoCareerPoker {
             let t;
             //if((t = this.trumps.forEach(elm => elm.rank === this.submits[0].rank - 1 &&)))
         }
-        this.trumps.forEach((elm) => elm.setSubmittable(false));
+        this.trumps.forEach((elm) => { 
+            elm.setSubmittable(false);
+            elm.setSelect(false);
+        });
         for(let i = 0, l = this.submits.length; i < l; i++) {
             this.switchSubmittable(this.submits[i]);
         }
@@ -43,8 +46,15 @@ export default class ClientNekoCareerPoker {
                 elm.setSubmittable(true);
             else if(elm.rank !== list[1])
                 elm.setSubmittable(false);
-            if(this.submits.length === this.selects.length)
+            if(this.submits.length === this.selects.length) {
                 elm.setSubmittable(false);
+            }
+        });
+        this.trumps.forEach(elm => {
+            this.selects.forEach(elem => {
+                if(elm.kind === elem.kind && elm.rank === elem.rank)
+                    elm.setSubmittable(true);
+            });
         });
     }
     select(list) {
@@ -58,8 +68,10 @@ export default class ClientNekoCareerPoker {
                 break;
         }
         this.selects.splice(i, 1);
-        if(this.selects.length === 0)
+        if(this.selects.length === 0) {
             this.updateSubmittable();
+        }
+
         else
             this.updateFromSelect(list);
     }
@@ -75,6 +87,7 @@ export default class ClientNekoCareerPoker {
     //private:
     switchSubmittable(list) {
         let i = list.rank;
+        console.log(i);
         while((i = this.getStrongTrump(i)) !== null) {
             let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
             if(t !== void 0 && t !== null) {
@@ -269,7 +282,14 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 let nk = new ClientNekoCareerPoker(test);
 nk.setSubmits([]);
 console.log(nk.rawTrumps);
-nk.setSubmits([['S', 9]]);
+nk.setSubmits([['S', 3], ['C', 3]]);
+console.log(nk.rawTrumps);
+nk.select(['S', 9]);
+nk.select(['C', 9]);
+console.log(nk.rawTrumps);
+nk.unSelect(['S', 9]);
+console.log(nk.rawTrumps);
+nk.unSelect(['C', 9]);
 console.log(nk.rawTrumps);
 */
 
