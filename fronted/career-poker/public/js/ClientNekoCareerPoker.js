@@ -5,7 +5,7 @@ import Trump from './Trump.js';
 import Kind from './Kind.js';
 
 export default class ClientNekoCareerPoker {
-class ClientNekoCareerPoker {
+//class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
         this.kind = new Kind();
@@ -42,7 +42,7 @@ class ClientNekoCareerPoker {
     }
     updateFromSelect(list) {
         this.trumps.forEach(elm => {
-            if(elm.rank === list[1])
+            if(elm.rank === list[1] || elm.rank === 15)
                 elm.setSubmittable(true);
             else if(elm.rank !== list[1])
                 elm.setSubmittable(false);
@@ -71,9 +71,11 @@ class ClientNekoCareerPoker {
         if(this.selects.length === 0) {
             this.updateSubmittable();
         }
-
         else
             this.updateFromSelect(list);
+    }
+    unSelectAll() {
+        this.selects.forEach(elm => unSelect([this.kind.getKindChar(elm.kind), elm.rank]));
     }
     //get player's trumps
     get trumps() { return this.f_trumps }
@@ -87,20 +89,19 @@ class ClientNekoCareerPoker {
     //private:
     switchSubmittable(list) {
         let i = list.rank;
-        console.log(i);
         while((i = this.getStrongTrump(i)) !== null) {
-            let t = this.trumps.find((elm) => !elm.isSelect && elm.rank === i);
+            let t = this.trumps.find((elm) => (!elm.isSelect && elm.rank === i) || (!elm.isSelect && elm.rank === i - 2 && elm.kind === list.kind));
             if(t !== void 0 && t !== null) {
                 t.setSubmittable(true);
                 t.setSelect(true);
-                while((t = this.trumps.find((elm) => !elm.isSubmittable && elm.rank === i)) !== void 0 && t !== null)
+                while((t = this.trumps.find((elm) => (!elm.isSubmittable && elm.rank === i) || (!elm.isSubmittable && elm.rank === i - 2 && elm.kind === list.kind))) !== void 0 && t !== null)
                     t.setSubmittable(true);
             }
             else {
-                t = this.trumps.find((elm) => elm.isSelect && elm.rank === i);
+                t = this.trumps.find((elm) => (elm.isSelect && elm.rank === i) || ((elm.isSelect && elm.rank === i - 2 && elm.kind === list.kind)));
                 while(t !== void 0 && t !== null) {
                     t.setSubmittable(false);
-                    t = this.trumps.find((elm) => elm.isSubmittable && elm.rank === i);
+                    t = this.trumps.find((elm) => (elm.isSubmittable && elm.rank === i) || ((elm.isSubmittable && elm.rank === i - 2 && elm.kind === list.kind)));
                 }
             }
         }
@@ -282,16 +283,7 @@ let test = [[ 'C', 4 ],  [ 'C', 5 ], ['H', 7],
 let nk = new ClientNekoCareerPoker(test);
 nk.setSubmits([]);
 console.log(nk.rawTrumps);
-nk.setSubmits([['S', 3], ['C', 3]]);
-console.log(nk.rawTrumps);
-nk.select(['S', 9]);
-nk.select(['C', 9]);
-console.log(nk.rawTrumps);
-nk.unSelect(['S', 9]);
-console.log(nk.rawTrumps);
-nk.unSelect(['C', 9]);
+nk.setSubmits([['S', 10], ['C', 10]]);
 console.log(nk.rawTrumps);
 */
-
-
 //updatesubmittable is private func
