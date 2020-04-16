@@ -252,8 +252,8 @@ phina.define("MainScene", {
         let postTrump = stageTrumps[i];
         postTrumps[i] = [postTrump, false];
       }
-      socket.emit('changeTurn', player.ID, roomName);
-      socket.emit('postTrumps', player.ID, postTrumps);
+      socket.emit('changeTurn', player, roomName);
+      socket.emit('postTrumps', player, postTrumps);
       self.clearPlayerTrumps();
       self.reviewPlayerTrumps(self);
       self.blackPlayerTrumps(self);
@@ -279,8 +279,9 @@ phina.define("MainScene", {
         postFlag = true;
         let test = this.clientPoker.submit();
         console.log(test);
-        socket.emit('changeTurn', player.ID, roomName);
-        socket.emit('postTrumps', player.ID, postTrumps);
+        player.cardRemain -= postTrumps.length;
+        socket.emit('changeTurn', player, roomName);
+        socket.emit('postTrumps', player, postTrumps);
         this.clearPlayerTrumps();
         this.reviewPlayerTrumps(this);
         this.blackPlayerTrumps(this);

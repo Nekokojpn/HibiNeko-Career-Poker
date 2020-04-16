@@ -55,16 +55,15 @@ io.on('connection',function(socket){
         let roomPlayers = players.filter((val) => {
             return val.roomName === room;
         });
-        console.log(roomPlayers);
-
+        let playerID = roomPlayers.length;
         let trumps = poker.getCardInfo(playerCount % 4);
-        let player = new Player(playerCount,postName, roomID, trumps.length, room);
+        let player = new Player(playerID,postName, trumps.length, room);
         players.push(player);
 
         socket.join(room);
         socket.emit('joinResponse', player);
         io.to(room).emit('joinOpponent', players.filter((val) => {
-            return val.roomID === player.roomID;  
+            return val.roomName === player.roomName;  
         }));
         socket.emit('roomResponse', room);
         socket.emit('gameInfo', player);
@@ -72,23 +71,25 @@ io.on('connection',function(socket){
         playerCount++;
     });
 
-    socket.on('changeTurn', (player_id, roomName) => {
-        let nextPlayerId = player_id + 1;
+    socket.on('changeTurn', (player, roomName) => {
+        let nextPlayerId = player.ID + 1;
         if(nextPlayerId % 4 === 0) nextPlayerId -= 4;
-        if(nextPlayerId > players.length - 1) nextPlayerId -= nextPlayerId % 4;
+        let roomPlayers = players.filter((val) => {
+            return val.roomName === player.roomName;
+        });
+        if(nextPlayerId > roomPlayers.length - 1) nextPlayerId -= nextPlayerId % 4;
         io.to(roomName).emit('turnResponse', nextPlayerId);
         console.log(nextPlayerId);
     });
 
-    socket.on('postTrumps', (player_id, postTrumps) => {
+    socket.on('postTrumps', (player, postTrumps) => {
         let stageTrumps = new Array();
         for(let i = 0; i < postTrumps.length; i++) {
             stageTrumps.push(postTrumps[i][0]);
         }
-        let player = players.find((val) => val.ID === player_id);
-        player.cardRemain -= stageTrumps.length;
+        console.log(player.cardRemain);
         for(let i = 0; i < players.length; i++) {
-            if(players[i].ID === player.ID) players[i] = player;
+            if(players[i].ID === player.ID && players[i].roomName === player.roomName) players[i] = player;
         }
         let opponents = players.filter((val) => val.roomName === player.roomName);
         io.to(player.roomName).emit('stageTrumps', stageTrumps);
@@ -108,10 +109,9 @@ io.on('connection',function(socket){
 });
 
 class Player {
-    constructor(_playerCount, _playerName, _roomID, _cardRemain, _roomName) {
+    constructor(_playerCount, _playerName, _cardRemain, _roomName) {
         this.ID = _playerCount;
         this.name = _playerName;
-        this.roomID = _roomID;
         this.cardRemain = _cardRemain;
         this.turnFlag = false;
         this.roomName = _roomName
