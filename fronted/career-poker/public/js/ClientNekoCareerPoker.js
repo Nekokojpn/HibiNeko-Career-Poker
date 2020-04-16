@@ -1,8 +1,8 @@
 const li = ['S', 'C', 'H', 'D', 'J'];
-let Trump = require('./Trump.js');
-let Kind = require('./Kind.js');
-//import Trump from './Trump.js';
-//import Kind from './Kind.js';
+//let Trump = require('./Trump.js');
+//let Kind = require('./Kind.js');
+import Trump from './Trump.js';
+import Kind from './Kind.js';
 
 export default class ClientNekoCareerPoker {
 //class ClientNekoCareerPoker {
