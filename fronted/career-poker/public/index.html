@@ -62,7 +62,6 @@
         this.messages.push(txt);
       });
     this.socket.on('gameInfo', (_player) => {
-      console.log(_player);
       this.player = _player;
     });
     this.socket.on('changeViewTurn', (_player) => {
@@ -210,6 +209,7 @@ var ASSETS = {
 let player;
 let players = new Array();
 let labels =  new Array();
+let postFlag = false;
 //let opponentLabels;//new Array();
 let roomName;
 let trumps;
@@ -244,8 +244,20 @@ phina.define("MainScene", {
     this.pass.addChildTo(this);
     this.pass.setPosition(this.gridX.center(-5), this.gridY.center(6.8));
     this.pass.setInteractive(false);
-    this.pass.onpointstart = function() {
-          socket.emit('changeTurn', player.ID, roomName);
+    this.pass.onpointstart = () => {
+      let self = this;
+      postFlag = true;
+      postTrumps = new Array();
+      for(let i = 0; i < stageTrumps.length; i++) {
+        let postTrump = stageTrumps[i];
+        postTrumps[i] = [postTrump, false];
+      }
+      socket.emit('changeTurn', player.ID, roomName);
+      socket.emit('postTrumps', player.ID, postTrumps);
+      self.clearPlayerTrumps();
+      self.reviewPlayerTrumps(self);
+      self.blackPlayerTrumps(self);
+      self.createPlayerTrumps(self);
     };
     this.pass.on('pointover', () => {
       this.pass.alpha = 0.5;
@@ -263,12 +275,17 @@ phina.define("MainScene", {
     this.post.setPosition(this.gridX.center(5), this.gridY.center(6.8));
     this.post.setInteractive(false);
     this.post.onpointstart = () => {
-          let test = this.clientPoker.submit();
-          console.log(test);
-          socket.emit('postTrumps', player.ID, postTrumps);
-          socket.emit('changeTurn', player.ID, roomName);
-          this.clearPlayerTrumps();
-          this.createPlayerTrumps(this);
+      if(postTrumps.length)  {
+        postFlag = true;
+        let test = this.clientPoker.submit();
+        console.log(test);
+        socket.emit('changeTurn', player.ID, roomName);
+        socket.emit('postTrumps', player.ID, postTrumps);
+        this.clearPlayerTrumps();
+        this.reviewPlayerTrumps(this);
+        this.blackPlayerTrumps(this);
+        this.createPlayerTrumps(this);
+      }
     };
     this.post.on('pointover', () => {
       this.post.alpha = 0.5;
@@ -317,7 +334,10 @@ phina.define("MainScene", {
 
     //初期socket
     setTimeout(() => {
-      socket.emit('joinPlayer', window.prompt("なまえをにゅうりょくしてね！", ""));
+      let name = window.prompt("なまえをにゅうりょくしてね！", "");
+      let sercretWord;
+      sercretWord = window.prompt("あいことばをにゅうりょくしてね！", "");
+      socket.emit('joinPlayer', name, sercretWord);
       //socket.emit('requestTrump');
     }, 100);
 
@@ -336,10 +356,12 @@ phina.define("MainScene", {
         this.turnFlag.show();
         this.pass.setInteractive(true);
         this.post.setInteractive(true);
+        postFlag = true
       }
       else {
         this.pass.hide();
         this.post.hide();
+        postFlag = false;
       }
     });
 
@@ -363,6 +385,7 @@ phina.define("MainScene", {
         this.pass.setInteractive(true);
         this.post.show();
         this.post.setInteractive(true);
+        postFlag = true;
       }
       else {
         this.turnFlag.hide();
@@ -370,15 +393,19 @@ phina.define("MainScene", {
         this.pass.setInteractive(false);
         this.post.hide();
         this.post.setInteractive(false);
+        postFlag = false;
+        this.blackPlayerTrumps(this);
       }
     });
 
     socket.on('stageTrumps', (_stageTrumps) => {
       stageTrumps = _stageTrumps;
-      this.pokerSetTtump(this, stageTrumps);
+      if(postFlag === true) {
+        this.pokerSetTtump(this, stageTrumps);
+        this.updateClientPoker(this);
+      }
       this.clearStageTrumps(this);
       this.createStageTrumps(this);
-      this.updateClientPoker(this);
     });
 
     socket.on('changeOpponentLabel', (_opponents) => {
@@ -425,7 +452,6 @@ phina.define("MainScene", {
             postTrumps = postTrumps.filter((val) => {
               return JSON.stringify(val) != JSON.stringify(deleteTrump);
             });
-            console.log([trumpMark, trumpNum]);
             self.clientPoker.unSelect([trumpMark, trumpNum]);
             self.updateClientPoker(self);
           }
@@ -451,7 +477,6 @@ phina.define("MainScene", {
       trumpSprite.name = trump;
       trumpSprites.push(trumpSprite);
     }
-    console.log(trumps);
   },
   clearPlayerTrumps: () => {
     let clearTrumps = new Array();
@@ -518,6 +543,9 @@ phina.define("MainScene", {
     self.clientPoker.setSubmits([]);
     //self.clientPoker.setSubmits([['S', 9]]);
     trumps = self.clientPoker.rawTrumps;
+    if(postFlag === false) {
+      self.blackPlayerTrumps(self);
+    }
   },
   updateClientPoker: (self) => {
     trumps = self.clientPoker.rawTrumps;
@@ -536,11 +564,13 @@ phina.define("MainScene", {
       let trumpNum = Number(stageTrump.substr(1));
       submitTrumps.push([trumpMark, trumpNum]);
     }
-    console.log(trumps);
     self.clientPoker.setSubmits(submitTrumps);
     trumps = self.clientPoker.rawTrumps;
-    console.log(trumps);
-    console.log(submitTrumps);
+  },
+  blackPlayerTrumps: (self) => {
+    for(let i = 0; i < trumps.length; i++) {
+      trumps[i][2] = false;
+    }
   }
 });
 
@@ -567,7 +597,6 @@ phina.main(function() {
 <style>
 html {
     height: 100%;
-    
 }
 
 body {
