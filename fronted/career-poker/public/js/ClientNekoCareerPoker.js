@@ -14,6 +14,7 @@ export default class ClientNekoCareerPoker {
         this.f_submits = new Array();
         this.f_selects = new Array();
         this.evo = false;
+        this.tevo = false;
     }
     //lists: Array<[char, Integer]> : Trumps submitted
     setSubmits(lists) {
@@ -22,6 +23,19 @@ export default class ClientNekoCareerPoker {
         this.updateSubmittable();
     }
     setEvolution(flag) { this.evo = flag }
+    setReverseEvolution() {
+        if(this.evo)
+            this.evo = false;
+        else
+            this.evo = true;
+    }
+    setTmpEvolution(flag) { this.tevo = flag }
+    setReverseTmpEvolution() {
+        if(this.tevo)
+            this.tevo = false;
+        else
+            this.tevo = true;
+    }
     updateSubmittable() {
         //No cards submitted
         if(this.submits.length === 0) {
@@ -192,6 +206,9 @@ export default class ClientNekoCareerPoker {
         lists.forEach(elm => this.trumps.push(new Trump(this.kind.getKind(elm[0]), elm[1])));
         this.f_trumps = this.sort(this.trumps);
     }
+    flushField() {
+        this.tevo = false;
+    }
     deleteTrumps(lists) {
         for(let i = 0, l = lists.length; i < l; i++) {
             let cur = lists[i];
@@ -228,8 +245,16 @@ export default class ClientNekoCareerPoker {
     get isEightCut() { return this.selects.some(elm => elm.rank === 8) }
     get isNineReverse() { return this.selects.some(elm => elm.rank === 9) }
     get ten() { return this.countNumber(10) }
-    get isJBack() { return this.selects.some(elm => elm.rank === 11) }
-    get isEvo() { return this.evo }
+    get isJBack() { 
+        setReverseEvolution();
+        return this.selects.some(elm => elm.rank === 11);
+    }
+    get isEvo() {
+        if(this.tevo)
+            return !this.evo;
+        else
+            return this.evo;
+    }
     get isStair() { return false } //TODO Implement:
     countNumber(n) {
         let i = 0;
