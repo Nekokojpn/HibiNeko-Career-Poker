@@ -5,7 +5,6 @@ import Trump from './Trump.js';
 import Kind from './Kind.js';
 
 export default class ClientNekoCareerPoker {
-class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
         this.kind = new Kind();

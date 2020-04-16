@@ -39,7 +39,7 @@ io.on('connection',function(socket){
         poker.init();
     }
     let room = 'room' + roomID;
-    socket.join(room);
+    
     //console.log(io.sockets.adapter.rooms);
 
     socket.on('connection_test_from_front', (txt, roomName) => {
@@ -47,11 +47,21 @@ io.on('connection',function(socket){
         io.to(roomName).emit('connection_test_from_server', txt);
     });
 
-    socket.on('joinPlayer', (postName) => {
+    socket.on('joinPlayer', (postName, sercretWord) => {
+        if(sercretWord !== '') {
+            room = sercretWord;
+        }
+        
+        let roomPlayers = players.filter((val) => {
+            return val.roomName === room;
+        });
+        console.log(roomPlayers);
+
         let trumps = poker.getCardInfo(playerCount % 4);
         let player = new Player(playerCount,postName, roomID, trumps.length, room);
-
         players.push(player);
+
+        socket.join(room);
         socket.emit('joinResponse', player);
         io.to(room).emit('joinOpponent', players.filter((val) => {
             return val.roomID === player.roomID;  
