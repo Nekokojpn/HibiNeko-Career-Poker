@@ -1,10 +1,11 @@
 const li = ['S', 'C', 'H', 'D', 'J'];
-//let Trump = require('./Trump.js');
-//let Kind = require('./Kind.js');
-import Trump from './Trump.js';
-import Kind from './Kind.js';
+let Trump = require('./Trump.js');
+let Kind = require('./Kind.js');
+//import Trump from './Trump.js';
+//import Kind from './Kind.js';
 
 export default class ClientNekoCareerPoker {
+//class ClientNekoCareerPoker {
     //lists: Array<[char, Integer]> : player's trumps
     constructor(lists) {
         this.kind = new Kind();
@@ -162,16 +163,7 @@ export default class ClientNekoCareerPoker {
         //Judge evo
         if(this.selects.length >= 4)
             this.setEvolution(true);
-        let map = new Map([
-            ['restrict', this.restrict],
-            [5, this.five],
-            [7, this.seven],
-            [8, this.isEightCut],
-            [9, this.isNineReverse],
-            [10, this.ten],
-            [11, this.isJBack],
-            ['evo', this.isEvo],
-        ]);
+        
         this.f_submits.length = 0;
         this.f_selects.forEach(elm => {
             this.submits.push(new Trump(elm.kind, elm.rank));
@@ -183,6 +175,16 @@ export default class ClientNekoCareerPoker {
                 }
             }
         });
+        let map = new Map([
+            ['restrict', this.restrict],
+            [5, this.five],
+            [7, this.seven],
+            [8, this.isEightCut],
+            [9, this.isNineReverse],
+            [10, this.ten],
+            [11, this.isJBack],
+            ['evo', this.isEvo],
+        ]);
         this.f_selects.length = 0;
         return map;
     }
