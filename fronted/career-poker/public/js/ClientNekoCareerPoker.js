@@ -37,6 +37,7 @@ export default class ClientNekoCareerPoker {
             this.tevo = true;
     }
     updateSubmittable() {
+        this.trumps.forEach((elm) => elm.setSelect(false));
         //No cards submitted
         if(this.submits.length === 0) {
             this.trumps.forEach((elm) => elm.setSubmittable(true));
@@ -189,16 +190,16 @@ export default class ClientNekoCareerPoker {
                 }
             }
         });
-        let map = new Map([
-            ['restrict', this.restrict],
-            [5, this.five],
-            [7, this.seven],
-            [8, this.isEightCut],
-            [9, this.isNineReverse],
-            [10, this.ten],
-            [11, this.isJBack],
-            ['evo', this.isEvo],
-        ]);
+        let map = {
+            'restrict': this.restrict,
+            '5': this.five,
+            '7': this.seven,
+            '8': this.isEightCut,
+            '9': this.isNineReverse,
+            '10': this.ten,
+            '11': this.isJBack,
+            'evo': this.isEvo,
+        };
         this.f_selects.length = 0;
         return map;
     }
@@ -245,10 +246,7 @@ export default class ClientNekoCareerPoker {
     get isEightCut() { return this.selects.some(elm => elm.rank === 8) }
     get isNineReverse() { return this.selects.some(elm => elm.rank === 9) }
     get ten() { return this.countNumber(10) }
-    get isJBack() { 
-        setReverseEvolution();
-        return this.selects.some(elm => elm.rank === 11);
-    }
+    get isJBack() {  return this.selects.some(elm => elm.rank === 11) }
     get isEvo() {
         if(this.tevo)
             return !this.evo;
