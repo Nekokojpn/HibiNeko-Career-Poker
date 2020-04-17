@@ -175,16 +175,16 @@ export default class ClientNekoCareerPoker {
                 }
             }
         });
-        let map = new Map([
-            ['restrict', this.restrict],
-            [5, this.five],
-            [7, this.seven],
-            [8, this.isEightCut],
-            [9, this.isNineReverse],
-            [10, this.ten],
-            [11, this.isJBack],
-            ['evo', this.isEvo],
-        ]);
+        let map = 
+            {'restrict': this.restrict,
+            '5': this.five,
+            '7': this.seven,
+            '8': this.isEightCut,
+            '9': this.isNineReverse,
+            '10': this.ten,
+            '11': this.isJBack,
+            'evo': this.isEvo}
+        ;
         this.f_selects.length = 0;
         return map;
     }
