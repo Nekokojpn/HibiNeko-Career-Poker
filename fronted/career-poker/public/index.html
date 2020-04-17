@@ -246,14 +246,14 @@ phina.define("MainScene", {
     this.pass.setInteractive(false);
     this.pass.onpointstart = () => {
       let self = this;
+      let judgment;
       postFlag = true;
       postTrumps = new Array();
       for(let i = 0; i < stageTrumps.length; i++) {
         let postTrump = stageTrumps[i];
         postTrumps[i] = [postTrump, false];
       }
-      socket.emit('changeTurn', player.ID, roomName);
-      socket.emit('postTrumps', player.ID, postTrumps);
+      socket.emit('postTrumps', [player, postTrumps, judgment]);
       self.clearPlayerTrumps();
       self.reviewPlayerTrumps(self);
       self.blackPlayerTrumps(self);
@@ -277,10 +277,10 @@ phina.define("MainScene", {
     this.post.onpointstart = () => {
       if(postTrumps.length)  {
         postFlag = true;
-        let test = this.clientPoker.submit();
-        console.log(test);
-        socket.emit('changeTurn', player.ID, roomName);
-        socket.emit('postTrumps', player.ID, postTrumps);
+        let judgment = this.clientPoker.submit();
+        console.log(judgment);
+        player.cardRemain -= postTrumps.length;
+        socket.emit('postTrumps', [player, postTrumps, judgment]);
         this.clearPlayerTrumps();
         this.reviewPlayerTrumps(this);
         this.blackPlayerTrumps(this);
@@ -334,12 +334,21 @@ phina.define("MainScene", {
 
     //初期socket
     setTimeout(() => {
-      let name = window.prompt("なまえをにゅうりょくしてね！", "");
-      let sercretWord;
-      sercretWord = window.prompt("あいことばをにゅうりょくしてね！", "");
+      let name = '';
+      while(name === '') {
+        name = window.prompt("なまえをにゅうりょくしてね！", '');
+      }
+      let sercretWord = '';
+      while(sercretWord === '') {
+        sercretWord = window.prompt("あいことばをにゅうりょくしてね！", '');
+      }
       socket.emit('joinPlayer', name, sercretWord);
-      //socket.emit('requestTrump');
     }, 100);
+
+    socket.on('overPlayers', (room) => {
+      window.alert(room + 'はもうにんずうがいっぱいだ！');
+      location.reload();
+    });
 
     socket.on('connection_test_from_server', (txt) => {
       console.log(txt);
@@ -541,7 +550,6 @@ phina.define("MainScene", {
   createClientPoker: (self, _trumps) => {
     self.clientPoker = new ClientNekoCareerPoker(_trumps);
     self.clientPoker.setSubmits([]);
-    //self.clientPoker.setSubmits([['S', 9]]);
     trumps = self.clientPoker.rawTrumps;
     if(postFlag === false) {
       self.blackPlayerTrumps(self);
@@ -566,6 +574,7 @@ phina.define("MainScene", {
     }
     self.clientPoker.setSubmits(submitTrumps);
     trumps = self.clientPoker.rawTrumps;
+    console.log(trumps);
   },
   blackPlayerTrumps: (self) => {
     for(let i = 0; i < trumps.length; i++) {

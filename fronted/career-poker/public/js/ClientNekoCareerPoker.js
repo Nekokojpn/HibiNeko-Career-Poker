@@ -198,7 +198,7 @@ export default class ClientNekoCareerPoker {
             '9': this.isNineReverse,
             '10': this.ten,
             '11': this.isJBack,
-            'evo': this.isEvo,
+            'evo': this.isEvo
         };
         this.f_selects.length = 0;
         return map;

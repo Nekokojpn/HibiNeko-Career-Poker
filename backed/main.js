@@ -1,8 +1,8 @@
 //ファイル読み込み
 let NekoCareerPoker = require('./public/js/NekoCareerPoker.js');
 
-let poker = new NekoCareerPoker();
-poker.init();//ソートまでされる
+//let poker = new NekoCareerPoker();
+//poker.init();//ソートまでされる
 //console.log(poker.getCardInfo(0));//カード情報
 //console.log(poker.getCardInfo(1));
 //console.log(poker.getCardInfo(2));
@@ -30,13 +30,13 @@ http.listen(PORT, function(){
 let players = new Array();
 let playerCount = 0;
 let roomID = 0;
+let roomTrumps = new Array();
 //socket
 io.on('connection',function(socket){
     console.log('join!');
     //ルーム処理
     if(playerCount % 4 === 0 && playerCount !== 0) {
         roomID++;
-        poker.init();
     }
     let room = 'room' + roomID;
     
@@ -55,44 +55,103 @@ io.on('connection',function(socket){
         let roomPlayers = players.filter((val) => {
             return val.roomName === room;
         });
-        console.log(roomPlayers);
+        let playerID = roomPlayers.length;
+        if(playerID <= 3) { 
+            if(roomTrumps[room] === undefined) {
+                let createdPoker = new NekoCareerPoker();
+                createdPoker.init();
+                roomTrumps[room] = createdPoker;
+            }
+            let roomPoker = roomTrumps[room];
+            let trumps = roomPoker.getCardInfo(playerID);
+            let player = new Player(playerID,postName, trumps.length, room);
+            players.push(player);
 
-        let trumps = poker.getCardInfo(playerCount % 4);
-        let player = new Player(playerCount,postName, roomID, trumps.length, room);
-        players.push(player);
-
-        socket.join(room);
-        socket.emit('joinResponse', player);
-        io.to(room).emit('joinOpponent', players.filter((val) => {
-            return val.roomID === player.roomID;  
-        }));
-        socket.emit('roomResponse', room);
-        socket.emit('gameInfo', player);
-        socket.emit('getTrump', trumps);
-        playerCount++;
+            socket.join(room);
+            socket.emit('joinResponse', player);
+            io.to(room).emit('joinOpponent', players.filter((val) => {
+                return val.roomName === player.roomName;  
+            }));
+            socket.emit('roomResponse', room);
+            socket.emit('gameInfo', player);
+            socket.emit('getTrump', trumps);
+            playerCount++
+        } else {
+            socket.emit('overPlayers', room);
+        }
     });
 
-    socket.on('changeTurn', (player_id, roomName) => {
-        let nextPlayerId = player_id + 1;
-        if(nextPlayerId % 4 === 0) nextPlayerId -= 4;
-        if(nextPlayerId > players.length - 1) nextPlayerId -= nextPlayerId % 4;
-        io.to(roomName).emit('turnResponse', nextPlayerId);
-        console.log(nextPlayerId);
+    socket.on('changeTurn', (player, judgment) => {
+        //console.log(judgment);
+        let testFive = 0;
+        //judgment
+        //playerID + 1 + どのくらい飛ばすか
+        let nextPlayerId = player.ID + 1;
+        if(testFive < 2) {
+            nextPlayerId += testFive;
+        } else {
+            nextPlayerId = player.ID;
+        }
+        
+
+        let roomPlayers = players.filter((val) => {
+            return val.roomName === player.roomName;
+        });
+        if(nextPlayerId > roomPlayers.length - 1) nextPlayerId -= nextPlayerId % 4;
+        io.to(player.roomName).emit('turnResponse', nextPlayerId);
     });
 
-    socket.on('postTrumps', (player_id, postTrumps) => {
+    socket.on('postTrumps', (postInfo) => {
+        /*
+         * define
+         */
+        let player = postInfo[0];
+        let postTrumps = postInfo[1];
+        let judgment = postInfo[2];
         let stageTrumps = new Array();
+        //場のカード切り出し
         for(let i = 0; i < postTrumps.length; i++) {
             stageTrumps.push(postTrumps[i][0]);
         }
-        let player = players.find((val) => val.ID === player_id);
-        player.cardRemain -= stageTrumps.length;
+        //プレイヤー更新
         for(let i = 0; i < players.length; i++) {
-            if(players[i].ID === player.ID) players[i] = player;
+            if(players[i].ID === player.ID && players[i].roomName === player.roomName) players[i] = player;
         }
-        let opponents = players.filter((val) => val.roomName === player.roomName);
+        //playerID + 1 + どのくらい飛ばすか
+        let nextPlayerId = player.ID + 1;
+        //部屋のプレイヤーを切り出す
+        let roomPlayers = players.filter((val) => {
+            return val.roomName === player.roomName;
+        });
+        //テスト
+        console.log(judgment);
+        console.log(judgment['5']);
+        let testFive = judgment['5'];
+        let testEight = true;
+        /*
+         * turnJudgment
+         */
+        //5とび
+        if(testFive === 1) {
+            nextPlayerId += testFive;
+        } else if(testFive > 1) {
+            nextPlayerId = player.ID;
+        }
+        //8切り
+        //1週回ったら最初のプレイヤーに戻す
+        if(nextPlayerId > roomPlayers.length - 1) nextPlayerId = nextPlayerId % 4;
+        console.log(nextPlayerId);
+        
+        /*
+         * socket
+         */
+        //ターン
+        io.to(player.roomName).emit('turnResponse', nextPlayerId);
+        //場のトランプを送信
         io.to(player.roomName).emit('stageTrumps', stageTrumps);
-        io.to(player.roomName).emit('changeOpponentLabel', opponents);
+        //相手プレイヤーの情報を送信
+        io.to(player.roomName).emit('changeOpponentLabel', roomPlayers);
+        //プレイヤー情報(vue.js,画面右下)
         socket.emit('changeViewTurn', player);
     });
 
@@ -108,10 +167,9 @@ io.on('connection',function(socket){
 });
 
 class Player {
-    constructor(_playerCount, _playerName, _roomID, _cardRemain, _roomName) {
+    constructor(_playerCount, _playerName, _cardRemain, _roomName) {
         this.ID = _playerCount;
         this.name = _playerName;
-        this.roomID = _roomID;
         this.cardRemain = _cardRemain;
         this.turnFlag = false;
         this.roomName = _roomName
