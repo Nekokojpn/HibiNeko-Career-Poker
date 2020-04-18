@@ -97,7 +97,9 @@ io.on('connection',function(socket){
         let roomPlayers = players.filter((val) => {
             return val.roomName === player.roomName;
         });
-        if(nextPlayerId > roomPlayers.length - 1) nextPlayerId -= nextPlayerId % 4;
+        console.log(nextPlayerId);
+        console.log(roomPlayers.length - 1);
+        if(nextPlayerId > roomPlayers.length - 1) nextPlayerId -= nextPlayerId % 4;console.log('test');
         io.to(player.roomName).emit('turnResponse', nextPlayerId);
     });
 
@@ -123,24 +125,29 @@ io.on('connection',function(socket){
         let roomPlayers = players.filter((val) => {
             return val.roomName === player.roomName;
         });
-        //テスト
-        console.log(judgment);
-        console.log(judgment['5']);
-        let testFive = judgment['5'];
-        let testEight = true;
+
         /*
          * turnJudgment
          */
-        //5とび
-        if(testFive === 1) {
-            nextPlayerId += testFive;
-        } else if(testFive > 1) {
-            nextPlayerId = player.ID;
+        //define
+        console.log(judgment);
+        if(judgment) {
+            let testFive = judgment['5'];
+            let testEight = true;
+            //5とび
+            if(testFive === 1) {
+                nextPlayerId += testFive;
+            } else if(testFive > 1) {
+                nextPlayerId = player.ID;
+            }
         }
         //8切り
         //1週回ったら最初のプレイヤーに戻す
+        console.log(nextPlayerId);
+        console.log(roomPlayers.length - 1);
         if(nextPlayerId > roomPlayers.length - 1) nextPlayerId = nextPlayerId % 4;
         console.log(nextPlayerId);
+        
         
         /*
          * socket
