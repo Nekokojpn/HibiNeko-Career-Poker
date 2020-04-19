@@ -113,6 +113,8 @@ io.on('connection',function(socket){
         let judgment = postInfo[2];
         let sevenTrumps = postInfo[3];
         let passFlag = postInfo[4];
+        let jbackFlag = false;
+        let evoFlag = false;
         let stageTrumps = new Array();
         
         
@@ -135,12 +137,15 @@ io.on('connection',function(socket){
          * turnJudgment
          */
         //define
+        console.log(judgment);
         if(judgment) {
             let testFive = judgment['5'];
             let testEight = true;
             //5とび
             if(testFive === 1) {
                 nextPlayerId += testFive;
+                passCount = 0;
+                passFlag = true;
             } else if(testFive > 1) {
                 nextPlayerId = player.ID;
                 //１週回ったから場を流す
@@ -151,6 +156,15 @@ io.on('connection',function(socket){
                 nextPlayerId = player.ID;
                 stageTrumps = '';
             }
+            //Jバック
+            if(judgment['11']) {
+                jbackFlag = true;
+            }
+            //革命
+            if(judgment['evo']) {
+                evoFlag = true;
+                console.log(judgment['evo']);
+            }
         }
         //全員パスしたら場を流す
         if(passFlag) {
@@ -158,10 +172,12 @@ io.on('connection',function(socket){
         } else {
             passCount = 0;
         }
-        console.log(passCount);
+
         if(passCount === 3) {
             stageTrumps = '';
+            passCount = 0;
         }
+        console.log(passCount);
         //1週回ったら最初のプレイヤーに戻す
         if(nextPlayerId > roomPlayers.length - 1) nextPlayerId = nextPlayerId % 4;
         
@@ -171,7 +187,7 @@ io.on('connection',function(socket){
         //ターン
         io.to(player.roomName).emit('turnResponse', nextPlayerId, sevenTrumps);
         //場のトランプを送信
-        io.to(player.roomName).emit('stageTrumps', stageTrumps);
+        io.to(player.roomName).emit('stageTrumps', [stageTrumps, jbackFlag, evoFlag]);
         //相手プレイヤーの情報を送信
         io.to(player.roomName).emit('changeOpponentLabel', roomPlayers);
         //プレイヤー情報(vue.js,画面右下)

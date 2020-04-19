@@ -325,6 +325,7 @@ phina.define("MainScene", {
           this.createPlayerTrumps(this);
         } else {
           this.postTrumps(this, sevenTrumps, false);
+          judgment = '';
         }
       }
     };
@@ -451,8 +452,25 @@ phina.define("MainScene", {
       }
     });
 
-    socket.on('stageTrumps', (_stageTrumps) => {
-      stageTrumps = _stageTrumps;
+    socket.on('stageTrumps', (response) => {
+      console.log(response);
+      stageTrumps = response[0];
+      let jbackFlag = response[1];
+      let evoFlag = response[2];
+      if(!stageTrumps) {
+        this.clientPoker.flushField();
+      }
+
+      if(jbackFlag) {
+        this.clientPoker.setReverseTmpEvolution();
+        console.log(jbackFlag);
+      }
+
+      if(evoFlag) {
+        this.clientPoker.setReverseEvolution();
+        console.log(evoFlag);
+      }
+
       if(postFlag === true) {
         this.pokerSetTtump(this, stageTrumps);
         this.updateClientPoker(this);
@@ -654,7 +672,6 @@ phina.define("MainScene", {
     }
     self.clientPoker.setSubmits(submitTrumps);
     trumps = self.clientPoker.rawTrumps;
-    console.log(trumps);
   },
   blackPlayerTrumps: (self) => {
     for(let i = 0; i < trumps.length; i++) {
@@ -662,7 +679,6 @@ phina.define("MainScene", {
     }
   },
   postTrumps: (self, sevenPost, passFlag) => {
-    console.log(sevenPost);
     socket.emit('postTrumps', [player, postTrumps, judgment, sevenPost, passFlag]);
     self.clearPlayerTrumps();
     self.reviewPlayerTrumps(self);
