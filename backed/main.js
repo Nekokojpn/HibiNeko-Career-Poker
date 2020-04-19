@@ -31,6 +31,7 @@ let players = new Array();
 let playerCount = 0;
 let roomID = 0;
 let roomTrumps = new Array();
+let passCount = 0;
 //socket
 io.on('connection',function(socket){
     console.log('join!');
@@ -110,9 +111,11 @@ io.on('connection',function(socket){
         let player = postInfo[0];
         let postTrumps = postInfo[1];
         let judgment = postInfo[2];
-        let sevenPost = postInfo[3];
+        let sevenTrumps = postInfo[3];
+        let passFlag = postInfo[4];
         let stageTrumps = new Array();
-        console.log(sevenPost);
+        
+        
         //場のカード切り出し
         for(let i = 0; i < postTrumps.length; i++) {
             stageTrumps.push(postTrumps[i][0]);
@@ -132,7 +135,6 @@ io.on('connection',function(socket){
          * turnJudgment
          */
         //define
-        console.log(judgment);
         if(judgment) {
             let testFive = judgment['5'];
             let testEight = true;
@@ -144,10 +146,20 @@ io.on('connection',function(socket){
                 //１週回ったから場を流す
                 stageTrumps = '';
             }
+            //8切り
+            if(judgment['8']) {
+                nextPlayerId = player.ID;
+                stageTrumps = '';
+            }
         }
-        //8切り
-        if(judgment['8']) {
-            nextPlayerId = player.ID;
+        //全員パスしたら場を流す
+        if(passFlag) {
+            passCount++;
+        } else {
+            passCount = 0;
+        }
+        console.log(passCount);
+        if(passCount === 3) {
             stageTrumps = '';
         }
         //1週回ったら最初のプレイヤーに戻す
@@ -157,7 +169,7 @@ io.on('connection',function(socket){
          * socket
          */
         //ターン
-        io.to(player.roomName).emit('turnResponse', nextPlayerId, sevenPost);
+        io.to(player.roomName).emit('turnResponse', nextPlayerId, sevenTrumps);
         //場のトランプを送信
         io.to(player.roomName).emit('stageTrumps', stageTrumps);
         //相手プレイヤーの情報を送信
