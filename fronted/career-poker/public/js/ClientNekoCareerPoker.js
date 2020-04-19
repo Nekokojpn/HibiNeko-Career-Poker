@@ -175,9 +175,6 @@ export default class ClientNekoCareerPoker {
         }
         this.f_submits = this.sort(this.f_submits);
         this.f_selects = this.sort(this.f_selects);
-        //Judge evo
-        if(this.selects.length >= 4)
-            this.setEvolution(true);
         
         this.f_submits.length = 0;
         this.f_selects.forEach(elm => {
