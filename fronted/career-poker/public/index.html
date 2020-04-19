@@ -225,6 +225,7 @@ let tempPost = new Array();
 let judgment;
 let sevenCount = 0;
 let sevenNum = 0;
+let tenFlag = false;
 document.body.style.cursor = "pointer";
 
 phina.define("MainScene", {
@@ -252,18 +253,16 @@ phina.define("MainScene", {
     this.pass.setInteractive(false);
     this.pass.onpointstart = () => {
       let self = this;
-      let judgment;
+      let judgment = '';
+      let sevenTrumps = '';
+      let passFlag = true;
       postFlag = true;
       postTrumps = new Array();
       for(let i = 0; i < stageTrumps.length; i++) {
         let postTrump = stageTrumps[i];
         postTrumps[i] = [postTrump, false];
       }
-      socket.emit('postTrumps', [player, postTrumps, judgment]);
-      self.clearPlayerTrumps();
-      self.reviewPlayerTrumps(self);
-      self.blackPlayerTrumps(self);
-      self.createPlayerTrumps(self);
+      this.postTrumps(this, sevenTrumps, passFlag);
     };
     this.pass.on('pointover', () => {
       this.pass.alpha = 0.5;
@@ -283,6 +282,7 @@ phina.define("MainScene", {
     this.post.onpointstart = () => {
       if(postTrumps.length)  {
         let sevenPost;
+        let sevenTrumps = new Array();
         if(sevenFlag) {
           sevenPost = postTrumps;
           this.clearPlayerTrumps();
@@ -290,12 +290,27 @@ phina.define("MainScene", {
           sevenFlag = false;
           sevenCount = 0;
           sevenNum = 0;
-          console.log(sevenPost);
-          console.log(postTrumps);
+
+          for(let i = 0; i < sevenPost.length; i++) {
+            let trumpMark = sevenPost[i][0].substr(0,1);
+            let trumpNum = Number(sevenPost[i][0].substr(1));
+            let sevenTrump = [trumpMark, trumpNum];
+            sevenTrumps.push(sevenTrump);
+          }
+          this.clientPoker.deleteTrumps(sevenTrumps);
+          if(tenFlag) {
+            tenFlag = false;
+            sevenTrumps = '';
+          }
+          console.log(sevenTrumps);
         } else {
           postFlag = true;
           judgment = this.clientPoker.submit();
           sevenNum = judgment['7'];
+          if(judgment['10']) {
+            sevenNum = judgment['10'];
+            tenFlag = true;
+          }
           console.log(judgment);
           player.cardRemain -= postTrumps.length;
         }
@@ -303,11 +318,13 @@ phina.define("MainScene", {
         if(sevenNum) {
           tempPost　= postTrumps;
           sevenFlag  = true;
+          this.pass.hide();
+          this.pass.setInteractive(false);
           this.clearPlayerTrumps();
           this.allSelectTrumps(this);
           this.createPlayerTrumps(this);
         } else {
-          this.postTrumps(this, sevenPost);
+          this.postTrumps(this, sevenTrumps, false);
         }
       }
     };
@@ -411,7 +428,7 @@ phina.define("MainScene", {
       this.createPlayerTrumps(this);
     });
 
-    socket.on('turnResponse', (nextPlayerId, _sevenPost) => {
+    socket.on('turnResponse', (nextPlayerId, _sevenTrumps) => {
       if(player.ID === nextPlayerId) {
         this.turnFlag.show();
         this.pass.show();
@@ -419,15 +436,9 @@ phina.define("MainScene", {
         this.post.show();
         this.post.setInteractive(true);
         postFlag = true;
-        let addTrumps = new Array();
-        for(let i = 0; i < _sevenPost.length; i++) {
-          let trumpMark = _sevenPost[i][0].substr(0,1);
-          let trumpNum = Number(_sevenPost[i][0].substr(1));
-          let addTrump = [trumpMark, trumpNum];
-          addTrumps.push(addTrump);
+        if(_sevenTrumps) {
+          this.clientPoker.addTrumps(_sevenTrumps);
         }
-        this.clientPoker.addTrumps(addTrumps);
-        console.log(addTrumps);
       }
       else {
         this.turnFlag.hide();
@@ -650,9 +661,9 @@ phina.define("MainScene", {
       trumps[i][2] = false;
     }
   },
-  postTrumps: (self, sevenPost) => {
+  postTrumps: (self, sevenPost, passFlag) => {
     console.log(sevenPost);
-    socket.emit('postTrumps', [player, postTrumps, judgment, sevenPost]);
+    socket.emit('postTrumps', [player, postTrumps, judgment, sevenPost, passFlag]);
     self.clearPlayerTrumps();
     self.reviewPlayerTrumps(self);
     self.blackPlayerTrumps(self);
