@@ -198,7 +198,7 @@ export default class ClientNekoCareerPoker {
             '9': this.isNineReverse,
             '10': this.ten,
             '11': this.isJBack,
-            'evo': this.isEvo
+            'evo': this.isEvo,
         };
         this.f_selects.length = 0;
         return map;
@@ -286,8 +286,8 @@ export default class ClientNekoCareerPoker {
             if(i == 13)
                 i = 0;
             else if(i == 2)
-                i = 13;
-            else if(i == 14)
+                i = 14;
+            else if(i == 15)
                 break;
         }
         return st;
